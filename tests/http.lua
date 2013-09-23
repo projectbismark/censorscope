@@ -1,4 +1,4 @@
-http = require("socket.http")
+local http = require("socket.http")
 
 HttpRequestExperiment = {}
 HttpRequestExperiment.__index = HttpRequestExperiment
