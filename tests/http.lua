@@ -20,5 +20,6 @@ function HttpRequestExperiment:run()
    end
 end
 
-experiment = HttpRequestExperiment.create({"http://www.google.com"})
+urls = {"http://www.google.com"}
+experiment = HttpRequestExperiment.create(urls)
 experiment:run()
