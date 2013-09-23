@@ -11,8 +11,7 @@ function HttpRequestExperiment.create(urls)
 end
 
 function HttpRequestExperiment:run()
-   for k, url in pairs(self.urls) do
-      print(k, url)
+   for _, url in pairs(self.urls) do
       body, status_code, header, status_line = http.request(url)
       print("Body:")
       print(body)
