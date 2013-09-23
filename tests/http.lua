@@ -13,12 +13,10 @@ end
 function HttpRequestExperiment:run()
    for _, url in pairs(self.urls) do
       body, status_code, header, status_line = http.request(url)
-      print("Body:")
-      print(body)
-      print("Status Code:")
-      print(status_code)
-      print("Headers")
-      for k,v in pairs(header) do print (k,v) end
+      if status_code == 200 then
+         print("Url:", url)
+         print("Status: ", status_code)
+      end
    end
 end
 
