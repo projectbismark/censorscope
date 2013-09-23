@@ -1,11 +1,26 @@
 local socket = require("socket")
-host = "74.125.140.113"
-port = 80
 
-if arg then
-   host = arg[1] or host
-   port = arg[2] or port
+TcpConnectExperiment = {}
+TcpConnectExperiment.__index = TcpConnectExperiment
+
+function TcpConnectExperiment.create(uris)
+   local experiment = {}
+   setmetatable(experiment, TcpConnectExperiment)
+   experiment.uris = uris
+   return experiment
 end
 
-client, msg = assert(socket.connect(host, port))
-print(client, msg)
+function TcpConnectExperiment:run()
+   for host, port in pairs(self.uris) do
+      client, msg = socket.connect(host, port)
+      if client then
+         print("Success")
+      else
+         print("Failure", msg)
+      end
+   end
+end
+
+uris = {["74.125.140.113"] = "80"}
+experiment = TcpConnectExperiment.create(uris)
+experiment:run()
