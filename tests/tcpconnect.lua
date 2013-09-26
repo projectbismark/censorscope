@@ -1,10 +1,10 @@
 local socket = require("socket")
-local utils = require("utils")
+--local utils = require("utils")
 
 function TcpConnectExperiment(urls)
    -- Store results of all the TCP Requests
    local results = {}
-   
+
    for _, url in ipairs(urls) do
       -- Parse the url to get host, port
       -- TODO: Wrap this around pcall()
@@ -14,7 +14,7 @@ function TcpConnectExperiment(urls)
       client, msg = socket.connect(host, port)
 
       -- Store the result in a table.
-      -- This "result" table has only 
+      -- This "result" table has only
       -- information about a single TCP Request.
       local result = {}
 
@@ -22,6 +22,7 @@ function TcpConnectExperiment(urls)
          result.success = true
       else
          result.success = false
+      end
 
       result.url = url
       result.msg = msg
@@ -29,17 +30,19 @@ function TcpConnectExperiment(urls)
       -- Add this table to our list of results
       table.insert(results, result)
    end
+
+   return results
 end
 
 function parse_url(url)
    -- This function assumes the url is of
    -- the form "<host>:<port>", if not raise
    -- an error.
-   
-   -- Check if there is a ":" separator
-   found = string.find(url, ":")
 
-   if found ~= nil then
+   -- Check if there is a ":" separator
+   separator = string.find(url, ":")
+
+   if separator ~= nil then
       -- Split the url into host and port
       uri = utils.split(url, ":")
 
@@ -52,5 +55,4 @@ function parse_url(url)
    end
 end
 
-urls = {"74.125.140.113:80"}
-TcpConnectExperiment(urls)
+return TcpConnectExperiment

@@ -3,13 +3,13 @@ local http = require("socket.http")
 function HttpRequestExperiment(urls)
    -- Store results of all the HTTP Requests.
    local results = {}
-   
+
    for _, url in ipairs(urls) do
       -- Make a HTTP request
       body, status_code, header, status_line = http.request(url)
 
       -- Store the result in a table.
-      -- This "result" table has only 
+      -- This "result" table has only
       -- information about a single HTTP Request.
       local result = {}
       result.url = url
@@ -26,5 +26,4 @@ function HttpRequestExperiment(urls)
    return results
 end
 
-urls = {"http://www.google.com"}
-res = HttpRequestExperiment(urls)
+return HttpRequestExperiment
