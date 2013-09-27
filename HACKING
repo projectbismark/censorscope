@@ -21,7 +21,7 @@ Code Structure
   Contains LICNSE information
 
 - README
-  Contains information on how to set and run censorscope
+  Contains information on how to set up and run censorscope
 
 - experiments/
   Contains all the experiments

@@ -17,3 +17,4 @@ If you'd like to contribute, these are some tasks that you might enjoy -
 - Write tests for the experiments
 - Write test specs for the experiments
 - Write documentation on how to write an experiment
+- Expand the HACKING file to include more information about the code
