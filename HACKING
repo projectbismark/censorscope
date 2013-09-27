@@ -1,0 +1,27 @@
+Hacking on Censorscope
+
+Style Guide
+-----------
+* Read http://lua-users.org/wiki/LuaStyleGuide
+* Use underscores to separate multiple words (http_request)
+* Use lowercase
+* Use 2 spaces for indentation
+* Do not use tabs(\t) for indentation (Set up your editor to
+  automagically convert tabs to spaces. If your editor can not do
+  that, it's time to start using emacs.)
+* Don't use the block comment format ([[-- this is crap --]]), just
+  use "--"
+
+Code Structure
+--------------
+- HACKING
+  Details on how to hack on censorscope
+
+- LICENSE
+  Contains LICNSE information
+
+- README
+  Contains information on how to set and run censorscope
+
+- experiments/
+  Contains all the experiments
