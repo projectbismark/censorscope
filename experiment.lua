@@ -1,5 +1,3 @@
-utils = require("experiments.utils")
-
 local tcpconnect = {}
 tcpconnect.urls = {"74.125.140.113:80"}
 

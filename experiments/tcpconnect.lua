@@ -1,5 +1,5 @@
 local socket = require("socket")
---local utils = require("utils")
+local utils = require("experiments.utils")
 
 function TcpConnectExperiment(urls)
    -- Store results of all the TCP Requests
