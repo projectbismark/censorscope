@@ -1,12 +1,12 @@
-local tcpconnect = {}
-tcpconnect.urls = {"74.125.140.113:80"}
+local tcp_connect = {}
+tcp_connect.urls = {"74.125.140.113:80"}
 
-local http = {}
-http.urls = {"http://www.google.com"}
+local http_request = {}
+http_request.urls = {"http://www.google.com"}
 
 local experiments = {}
-experiments.http = http
-experiments.tcpconnect = tcpconnect
+experiments.http_request = http_request
+experiments.tcp_connect = tcp_connect
 
 for name, experiment in pairs(experiments) do
    experiment.exec = require("experiments."..name)

@@ -1,7 +1,7 @@
 local socket = require("socket")
 local utils = require("experiments.utils")
 
-function TcpConnectExperiment(urls)
+function tcp_connect_experiment(urls)
    -- Store results of all the TCP Requests
    local results = {}
 
@@ -55,4 +55,4 @@ function parse_url(url)
    end
 end
 
-return TcpConnectExperiment
+return tcp_connect_experiment

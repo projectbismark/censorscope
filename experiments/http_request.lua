@@ -1,6 +1,6 @@
 local http = require("socket.http")
 
-function HttpRequestExperiment(urls)
+function http_request_experiment(urls)
    -- Store results of all the HTTP Requests.
    local results = {}
 
@@ -26,4 +26,4 @@ function HttpRequestExperiment(urls)
    return results
 end
 
-return HttpRequestExperiment
+return http_request_experiment
