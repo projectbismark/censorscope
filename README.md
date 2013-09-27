@@ -7,7 +7,7 @@ To set up the development environment:
     $ sudo apt-get install lua5.1
     $ git clone https://github.com/gsathya/censorscope.git
     $ cd censorscope/
-    $ lua experiment.lua
+    $ lua censorscope.lua
 
 ### Contributing
 Please read the HACKING file to understand the codebase.
