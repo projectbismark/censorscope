@@ -14,6 +14,7 @@ Please read the HACKING file to understand the codebase.
 
 If you'd like to contribute, these are some tasks that you might enjoy -
 - Check out the issues for something to hack on
+- Write moar experiments
 - Write tests for the experiments
 - Write test specs for the experiments
 - Write documentation on how to write an experiment
