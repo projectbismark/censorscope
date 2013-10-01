@@ -1,11 +1,5 @@
 local utils = require("experiments.utils")
-
-local tcp_connect = {}
-local http_request = {}
-
-local experiments = {}
-experiments.http_request = http_request
-experiments.tcp_connect = tcp_connect
+local experiments = require("config")
 
 function get_input(file_name)
    -- Local table to store list of inputs
@@ -38,11 +32,11 @@ end
 
 for name, experiment in pairs(experiments) do
    experiment.exec = require("experiments."..name)
-   experiment.urls = get_input(name..".txt")
+   experiment.urls = get_input(experiment.input)
 
    local results = experiment.exec(experiment.urls)
 
    for _, result in pairs(results) do
-      write_result(result, name..".txt")
+      write_result(result, experiment.output)
    end
 end
