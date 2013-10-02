@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Sathyanarayanan Gunasekaran, Georgia Tech Research Corporation
+# See LICENSE for licensing information
+
 -- Table to store all the util functions
 -- we define here.
 local utils = {}

@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Sathyanarayanan Gunasekaran, Georgia Tech Research Corporation
+# See LICENSE for licensing information
+
 local experiments = {}
 
 experiments["http_request"] = {

@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Sathyanarayanan Gunasekaran, Georgia Tech Research Corporation
+# See LICENSE for licensing information
+
 local http = require("socket.http")
 
 function http_request_experiment(urls)
