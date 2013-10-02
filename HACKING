@@ -1,0 +1,35 @@
+Hacking on Censorscope
+
+Style Guide
+-----------
+* Read http://lua-users.org/wiki/LuaStyleGuide
+* Use underscores to separate multiple words (http_request)
+* Use lowercase
+* Use 2 spaces for indentation
+* Do not use tabs(\t) for indentation (set up your editor to
+  automagically convert tabs to spaces. If your editor can not do
+  that, it's time to start using emacs.)
+* Don't use the block comment format ([[-- this is crap --]]), just
+  use "--"
+
+Commit messages
+---------------
+* Properly format git commit messages -
+  http://git-scm.com/book/ch5-2.html#Commit-Guidelines
+* Break large changes into smaller commits
+* Make commits as self contained as possible -- if you're moving
+  around code and changing logic, break it into smaller commits
+
+Code Structure
+--------------
+- HACKING
+  Details on how to hack on censorscope
+
+- LICENSE
+  Contains LICNSE information
+
+- README
+  Contains information on how to set up and run censorscope
+
+- experiments/
+  Contains all the experiments
