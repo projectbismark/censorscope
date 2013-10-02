@@ -14,7 +14,7 @@ function utils.split(str, pat)
    local s, e, cap = str:find(fpat, 1)
    while s do
       if s ~= 1 or cap ~= "" then
-	 table.insert(t,cap)
+         table.insert(t,cap)
       end
       last_end = e+1
       s, e, cap = str:find(fpat, last_end)
