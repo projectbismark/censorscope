@@ -1,5 +1,5 @@
-# Copyright (c) 2013, Sathyanarayanan Gunasekaran, Georgia Tech Research Corporation
-# See LICENSE for licensing information
+-- Copyright (c) 2013, Sathyanarayanan Gunasekaran, Georgia Tech Research Corporation
+-- See LICENSE for licensing information
 
 local socket = require("socket")
 local utils = require("experiments.utils")
