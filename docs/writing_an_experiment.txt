@@ -1,0 +1,37 @@
+Writing an experiment with Censorscope
+======================================
+
+1) Create a new experiment in experiments/
+   $ cd experiments/
+   $ touch epic_experiment.lua
+
+2) Start writing code
+   $ emacs epic_experiment.lua
+
+3) Add the experiment metadata to config.lua
+   - Add a new entry to the `experiments` table
+
+   - This new entry should have the same name as your experiment file
+     without the ".lua" extension. (epic_experiment)
+
+   - ["input"] is the input file name for your experiment (usually
+     stored in inputs/)
+     
+   - ["output"] is the output file name for your experiment (usually
+     stored in results/)
+
+   - Example -
+     $ emacs config.lua
+     # Add the following:
+     experiments["epic_experiment"] = {
+       ["input"] = "epic_experiment.txt",
+       ["output"] = "epic_experiment.txt",
+     }
+       
+4) Create input file for your experiment in inputs/
+   $ cd inputs/
+   $ touch epic_experiment.txt
+   
+5) Run censorscope and check results/ for the output
+   $ cd results/
+   $ cat epic_experiment.txt
