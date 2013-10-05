@@ -11,7 +11,7 @@ To set up the development environment:
     $ lua censorscope.lua
 
 ### Contributing
-Please read the HACKING file to understand the codebase.
+Please read the docs/HACKING file to understand the codebase.
 
 If you'd like to contribute, these are some tasks that you might enjoy -
 - Check out the issues for something to hack on
