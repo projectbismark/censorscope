@@ -14,7 +14,7 @@ Style Guide
 
 Getting emacs to edit Censorscope properly
 ------------------------------------------
-gsathya usually has the following snippet in .emacs file
+gsathya usually has the following snippet in his .emacs file
 
 ----
 ;; Lua mode
