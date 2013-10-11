@@ -5,20 +5,9 @@ local utils = require("experiments.utils")
 local experiments = require("config")
 
 function get_input(file_name)
-  -- Local table to store list of inputs
-  local inputs = {}
+  -- Load input table
+  local inputs = require("inputs."..file_name)
 
-  -- Open file to read from
-  -- TODO: Check if file exists
-  io.input("inputs/"..file_name)
-
-  -- Iterate through the file and store
-  -- it in "inputs" table
-  for line in io.lines() do
-     table.insert(inputs, line)
-  end
-
-  -- Return the list of inputs
   return inputs
 end
 
