@@ -23,11 +23,9 @@ function get_input(file_name)
 end
 
 function write_result(result, file_name)
-  -- TODO: Check if file already exists
-  -- TODO: Use timestamps in file_name?
   -- TODO: Check if results/ is present, if not
   --       create it
-  io.output("results/"..file_name)
+  io.output("results/"..file_name.."["..os.date("%m.%d.%Y %H:%M:%S").."]")
 
   -- Convert tables to string and write to file
   utils.serialize(result)
