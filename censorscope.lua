@@ -2,7 +2,7 @@
 -- See LICENSE for licensing information
 
 local utils = require("experiments.utils")
-local experiments = require("config")
+local experiments = require("deck")
 
 function get_input(file_name)
   -- Load input table
