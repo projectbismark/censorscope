@@ -2,7 +2,7 @@
 -- See LICENSE for licensing information
 
 local utils = require("experiments.utils")
-local experiments = require("deck")
+local deck = require("deck")
 
 function get_input(file_name)
   -- Load input table
@@ -25,7 +25,7 @@ function write_result(result, file_name)
   utils.serialize(result)
 end
 
-for name, experiment in pairs(experiments) do
+for name, experiment in pairs(deck.experiments) do
   experiment.exec = require("experiments."..name)
   experiment.urls = get_input(experiment.input)
 
