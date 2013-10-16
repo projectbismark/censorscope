@@ -5,12 +5,12 @@ local experiments = {}
 
 experiments["http_request"] = {
   ["input"] = "http_request",
-  ["output"] = "http_request.txt",
+  ["output"] = "http_request"
 }
 
 experiments["tcp_connect"] = {
   ["input"] = "tcp_connect",
-  ["output"] = "tcp_connect.txt"
+  ["output"] = "tcp_connect"
 }
 
 return experiments
