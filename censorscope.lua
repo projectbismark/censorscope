@@ -4,6 +4,8 @@
 local utils = require("experiments.utils")
 local deck = require("deck")
 
+local experiments = deck.experiments
+
 function get_input(file_name)
   -- Load input table
   local inputs = require("inputs."..file_name)
@@ -23,6 +25,18 @@ function write_result(result, file_name)
 
   -- Convert tables to string and write to file
   utils.serialize(result)
+end
+
+
+function bootstrap()
+  for name, experiment in pairs(experiments) do
+    experiment.bootstrap_time = os.time()
+
+    experiment.urls = get_input(experiment.input)
+
+    local exec = require("experiments."..name)
+    experiment.exec = coroutine.wrap(exec, experiment.urls)
+  end
 end
 
 for name, experiment in pairs(deck.experiments) do
