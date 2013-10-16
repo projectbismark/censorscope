@@ -16,6 +16,9 @@ function write_result(result, file_name)
   -- TODO: Use timestamps in file_name?
   -- TODO: Check if results/ is present, if not
   --       create it
+
+  local file_name = string.format("%s-%s.txt", file_name,
+                                  os.date("%Y%m%d-%H%M%S"))
   io.output("results/"..file_name)
 
   -- Convert tables to string and write to file
