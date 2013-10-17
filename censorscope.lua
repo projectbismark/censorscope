@@ -1,5 +1,6 @@
 -- Copyright (c) 2013, Sathyanarayanan Gunasekaran, Georgia Tech Research Corporation
 -- See LICENSE for licensing information
+DEBUG = true
 
 local utils = require("experiments.utils")
 local deck = require("deck")

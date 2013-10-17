@@ -51,4 +51,10 @@ function utils.serialize(o)
   end
 end
 
+function utils.pprint(data)
+  if DEBUG == true then
+    print(string.format("[%s] %s", os.date(), data))
+  end
+end
+
 return utils
