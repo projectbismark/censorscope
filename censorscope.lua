@@ -28,16 +28,29 @@ end
 function start_experiment(name, experiment)
   utils.pprint("Starting "..name)
   --  this is a synchronous call, should we do it async?
-  experiment.results = experiment.exec(experiment.urls)
+  success, experiment.results = coroutine.resume(experiment.exec, experiment.urls)
+
+  if not success then
+    -- throw exception
+    utils.pprint("Error in "..name)
+  end
 
   for _, result in pairs(experiment.results) do
     write_result(result, experiment.output)
   end
 end
 
-function reschedule(name, experiment)
+function schedule(name, experiment)
+  utils.pprint("Scheduling "..name)
+
   if experiment.rerun > 0 then
     experiment.rerun = experiment.rerun-1
+  end
+
+  if coroutine.status(experiment.exec) == "dead" then
+    -- TODO: this is repeated, maybe optimize it?
+    local exec = require("experiments."..name)
+    experiment.exec = coroutine.create(exec)
   end
 
   experiment.last_run = os.time()
@@ -58,15 +71,16 @@ function engine(experiments)
       local start_time = experiment.last_run + interval
 
       if start_time <= os.time() then
-        -- TODO: check if experiment has already finished, if so,
-        -- restart it
+        -- we run the experiment at least once, is that a good
+        -- assumption to make? for eg., if the user sets rerun = 0,
+        -- the experiment will still be run once
         start_experiment(name, experiment)
 
         -- check if we have to run this experiment again
         if experiment.rerun == 0 then
           experiments.remove(name)
         else
-          reschedule(name, experiment)
+          schedule(name, experiment)
         end
 
       end
@@ -82,7 +96,7 @@ function bootstrap(experiments)
     utils.pprint("Bootstrapping "..name)
 
     local exec = require("experiments."..name)
-    experiment.exec = coroutine.wrap(exec)
+    experiment.exec = coroutine.create(exec)
   end
 end
 
