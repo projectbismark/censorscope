@@ -15,8 +15,6 @@ function get_input(file_name)
 end
 
 function write_result(result, file_name)
-  -- TODO: Check if file already exists
-  -- TODO: Use timestamps in file_name?
   -- TODO: Check if results/ is present, if not
   --       create it
   local file_name = string.format("%s-%s.txt", file_name,
