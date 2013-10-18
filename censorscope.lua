@@ -38,12 +38,12 @@ end
 function engine(experiments)
   -- iterate through each experiment
   for name, experiment in pairs(experiments) do
-    -- convert start_time to seconds
-    local start_time = experiment.interval * 60
-    -- elapsed_time is slightly misleading
-    local elapsed_time = experiment.bootstrap_time + start_time
+    -- convert interval to seconds
+    local interval = experiment.interval * 60
 
-    if elapsed_time > os.time() then
+    local start_time = experiment.last_run + interval
+
+    if start_time <= os.time() then
       -- TODO: check if experiment has already finished, if so,
       -- restart it
       start_experiment(name, experiment)
