@@ -5,19 +5,21 @@ local experiments = {
   http_request = {
     input      = "http_request",
     output     = "http_request",
-    start_time = 60,
-    timeout    = 5
+    interval   = 60,
+    timeout    = 5,
+    rerun      = -1
   },
   tcp_connect = {
     input      = "tcp_connect",
     output     = "tcp_connect",
-    start_time = 60,
-    timeout    = 5
+    interval   = 60,
+    timeout    = 5,
+    rerun      = -1
   }
 }
 
 local metadata = {
-  poll_server = 60
+  bootstrap = 60
 }
 
 local deck = {

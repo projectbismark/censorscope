@@ -28,25 +28,48 @@ function write_result(result, file_name)
   utils.serialize(result)
 end
 
+function start_experiment(name, experiment)
+  utils.pprint("Starting "..name)
+  --  this is a synchronous call, should we do it async?
+  experiment.results = experiment.exec(experiment.urls)
+
+  for _, result in pairs(experiment.results) do
+    write_result(result, experiment.output)
+  end
+end
+
+function engine()
+  -- iterate through each experiment
+  for name, experiment in pairs(experiments) do
+    -- convert start_time to seconds
+    local start_time = experiment.interval * 60
+    -- elapsed_time is slightly misleading
+    local elapsed_time = experiment.bootstrap_time + start_time
+
+    if elapsed_time > os.time() then
+      -- TODO: check if experiment has already finished, if so,
+      -- restart it
+      start_experiment(name, experiment)
+      -- TODO: reschedule experiment
+    end
+  end
+end
 
 function bootstrap()
   for name, experiment in pairs(experiments) do
     experiment.bootstrap_time = os.time()
-
     experiment.urls = get_input(experiment.input)
 
+    utils.pprint("Bootstrapping "..name)
+
     local exec = require("experiments."..name)
-    experiment.exec = coroutine.wrap(exec, experiment.urls)
+    experiment.exec = coroutine.wrap(exec)
   end
 end
 
-for name, experiment in pairs(deck.experiments) do
-  experiment.exec = require("experiments."..name)
-  experiment.urls = get_input(experiment.input)
-
-  local results = experiment.exec(experiment.urls)
-
-  for _, result in pairs(results) do
-    write_result(result, experiment.output)
-  end
+function director()
+  bootstrap()
+  engine()
 end
+
+director()
