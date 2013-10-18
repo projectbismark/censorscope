@@ -5,8 +5,6 @@ DEBUG = true
 local utils = require("experiments.utils")
 local deck = require("deck")
 
-local experiments = deck.experiments
-
 function get_input(file_name)
   -- Load input table
   local inputs = require("inputs."..file_name)
@@ -37,7 +35,7 @@ function start_experiment(name, experiment)
   end
 end
 
-function engine()
+function engine(experiments)
   -- iterate through each experiment
   for name, experiment in pairs(experiments) do
     -- convert start_time to seconds
@@ -54,7 +52,7 @@ function engine()
   end
 end
 
-function bootstrap()
+function bootstrap(experiments)
   for name, experiment in pairs(experiments) do
     experiment.bootstrap_time = os.time()
     experiment.urls = get_input(experiment.input)
@@ -67,8 +65,9 @@ function bootstrap()
 end
 
 function director()
-  bootstrap()
-  engine()
+  local experiments = deck.experiments
+  bootstrap(experiments)
+  engine(experiments)
 end
 
 director()
