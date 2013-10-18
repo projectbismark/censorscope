@@ -35,26 +35,48 @@ function start_experiment(name, experiment)
   end
 end
 
+function reschedule(name, experiment)
+  if experiment.rerun > 0 then
+    experiment.rerun = experiment.rerun-1
+  end
+
+  experiment.last_run = os.time()
+end
+
 function engine(experiments)
-  -- iterate through each experiment
-  for name, experiment in pairs(experiments) do
-    -- convert interval to seconds
-    local interval = experiment.interval * 60
+  -- these are just speed optimizations, binding to local vars makes
+  -- them more efficient
+  local experiments = experiments
+  local next = next
 
-    local start_time = experiment.last_run + interval
+  while next(experiments) ~= nil do
+    -- iterate through each experiment
+    for name, experiment in pairs(experiments) do
+      -- convert interval to seconds
+      local interval = experiment.interval * 60
 
-    if start_time <= os.time() then
-      -- TODO: check if experiment has already finished, if so,
-      -- restart it
-      start_experiment(name, experiment)
-      -- TODO: reschedule experiment
+      local start_time = experiment.last_run + interval
+
+      if start_time <= os.time() then
+        -- TODO: check if experiment has already finished, if so,
+        -- restart it
+        start_experiment(name, experiment)
+
+        -- check if we have to run this experiment again
+        if experiment.rerun == 0 then
+          experiments.remove(name)
+        else
+          reschedule(name, experiment)
+        end
+
+      end
     end
   end
 end
 
 function bootstrap(experiments)
   for name, experiment in pairs(experiments) do
-    experiment.bootstrap_time = os.time()
+    experiment.last_run = os.time()
     experiment.urls = get_input(experiment.input)
 
     utils.pprint("Bootstrapping "..name)
