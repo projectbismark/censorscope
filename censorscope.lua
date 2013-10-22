@@ -35,6 +35,8 @@ function start_experiment(name, experiment)
     utils.pprint("Error in "..name)
   end
 
+  experiment.last_run = os.time()
+
   for _, result in pairs(experiment.results) do
     write_result(result, experiment.output)
   end
@@ -52,8 +54,6 @@ function schedule(name, experiment)
     local exec = require("experiments."..name)
     experiment.exec = coroutine.create(exec)
   end
-
-  experiment.last_run = os.time()
 end
 
 function engine(experiments)
