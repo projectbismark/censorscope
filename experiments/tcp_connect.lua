@@ -2,7 +2,7 @@
 -- See LICENSE for licensing information
 
 local socket = require("socket")
-local utils = require("experiments.utils")
+local utils = require("..utils")
 
 function tcp_connect_experiment(urls)
   -- Store results of all the TCP Requests

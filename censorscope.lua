@@ -1,7 +1,7 @@
 -- Copyright (c) 2013, Sathyanarayanan Gunasekaran, Georgia Tech Research Corporation
 -- See LICENSE for licensing information
 
-local utils = require("experiments.utils")
+local utils = require("utils")
 local experiments = require("config")
 
 function get_input(file_name)
