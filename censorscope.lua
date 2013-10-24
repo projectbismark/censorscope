@@ -14,11 +14,15 @@ end
 function write_result(result, file_name)
   -- TODO: Check if file already exists
   -- TODO: Use timestamps in file_name?
-  -- TODO: Check if results/ is present, if not
-  --       create it
 
   local file_name = string.format("%s-%s.txt", file_name,
                                   os.date("%Y%m%d-%H%M%S"))
+
+  -- Check if results/ is present, if not create it 
+  if io.open("results","r") == nil  then
+      os.execute("mkdir results")
+  end
+
   io.output("results/"..file_name)
 
   -- Convert tables to string and write to file
