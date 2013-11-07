@@ -1,8 +1,8 @@
 local sandbox = {}
 
-local BYTECODE_MAGIC_NUMBER = 27
+local sandboxed_api = require("api")
 
-local sandboxed_environment = {}
+local BYTECODE_MAGIC_NUMBER = 27
 
 local function load_sandboxed_code(filename)
   local handle, err = io.open(filename, "r")
@@ -30,14 +30,14 @@ end
 -- Arguments:
 -- - filename is the filename of the Lua source to execute in the sandbox.
 -- Returns:
--- - the return of evaluation of the code, or nil if execution was unsuccessful.
+-- - the return value of evaluation of the code, or nil if execution was unsuccessful.
 -- - an error, or nil if execution was successful.
 function sandbox.run(filename)
   local sandboxed_function, err = load_sandboxed_code(filename)
   if err then
     return nil, err
   end
-  setfenv(sandboxed_function, sandboxed_environment)
+  setfenv(sandboxed_function, sandboxed_api)
   local is_successful, return_value = pcall(sandboxed_function)
   if not is_successful then
     return nil, "error running sandboxed code: " .. return_value
