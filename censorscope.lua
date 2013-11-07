@@ -113,6 +113,7 @@ function main()
   transfer.sync_sandbox()
   local configuration = load_configuration()
   engine(configuration)
+  transfer.upload_results()
 end
 
 main()

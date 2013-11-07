@@ -10,7 +10,7 @@ function transfer.sync_sandbox()
   return nil
 end
 
-function transfer.upload()
+function transfer.upload_results()
   local remote_path = "univers.noise.gatech.edu:censorscope-server/results"
   local local_path = "results"
 
