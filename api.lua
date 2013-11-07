@@ -49,17 +49,22 @@ function api_creater.new_instance(experiment)
     return dns.dns_lookup(domain)
   end
 
-  function api.write_result(result)
+  -- Write a result to the current results file.
+  --
+  -- Each run on an experiment has one result file. This function appends to it.
+  --
+  -- Arguments:
+  -- - result is a Lua object to write. You may pass strings, numbers, booleans,
+  -- and tables containing those types. Tables may be nested.
+  -- Returns:
+  -- - an error message, or nil if no error occurred.
+  function api.write_result(output)
     -- TODO: Check if results/ is present, if not
     --       create it
     local filename = string.format("results/%s-%s.txt", experiment.name, run_id)
     utils.pprint("writing results to " .. filename)
 
     local handle, err = io.open(filename, "a")
-    if err then
-      return err
-    end
-    local output, err = utils.serialize(result)
     if err then
       return err
     end
@@ -71,8 +76,12 @@ function api_creater.new_instance(experiment)
 
   -- Useful functions from the Lua standard library. These are safe accoring to
   -- http://lua-users.org/wiki/SandBoxes.
-  api.pairs = pairs
   api.ipairs = ipairs
+  api.pairs = pairs
+  api.string = {}
+  api.string.format = string.format
+  api.tostring = tostring
+  api.type = type
 
   return api
 end
