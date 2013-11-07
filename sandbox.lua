@@ -1,7 +1,5 @@
 local sandbox = {}
 
-local sandboxed_api = require("api")
-
 local BYTECODE_MAGIC_NUMBER = 27
 
 local function load_sandboxed_code(filename)
@@ -28,21 +26,52 @@ end
 -- See http://lua-users.org/wiki/SandBoxes
 --
 -- Arguments:
--- - filename is the filename of the Lua source to execute in the sandbox.
+-- - sandboxed_function is the function object to run in the sandbox.
+-- - environment in which to run the function. Be very careful.
 -- Returns:
--- - the return value of evaluation of the code, or nil if execution was unsuccessful.
+-- - the return value(s) of evaluation of the code, or nil if execution was unsuccessful.
 -- - an error, or nil if execution was successful.
-function sandbox.run(filename)
+function sandbox.run_function(sandboxed_function, environment)
+  setfenv(sandboxed_function, environment)
+  local is_successful, return_value = pcall(sandboxed_function)
+  if not is_successful then
+    return nil, return_value
+  end
+  return return_value, nil
+end
+
+-- Run an experiment in a sandbox.
+--
+-- See http://lua-users.org/wiki/SandBoxes
+--
+-- Arguments:
+-- - filename is the filename of the Lua source to execute in the sandbox.
+-- - environment in which to run the function. Be very careful.
+-- Returns:
+-- - the return value(s) of evaluation of the code, or nil if execution was unsuccessful.
+-- - an error, or nil if execution was successful.
+function sandbox.run_file(filename, environment)
   local sandboxed_function, err = load_sandboxed_code(filename)
   if err then
     return nil, err
   end
-  setfenv(sandboxed_function, sandboxed_api)
-  local is_successful, return_value = pcall(sandboxed_function)
-  if not is_successful then
-    return nil, "error running sandboxed code: " .. return_value
+  return sandbox.run_function(sandboxed_function, environment)
+end
+
+-- Determine whether a module name is valid. This is conservative (i.e., it may
+-- exclude module names that Lua normally considers valid.) The primary purpose
+-- of this function is to prevent us from accidentally loading a module outside
+-- the sandbox.
+--
+-- Arguments:
+-- - name is the name of the module to validate.
+-- Returns:
+-- - true if the name is valid, false otherwise.
+function sandbox.is_valid_module_name(name)
+  if not name:match("^[%w_-]+$") then
+    return false
   end
-  return return_value, nil
+  return true
 end
 
 return sandbox

@@ -2,15 +2,15 @@
 -- See LICENSE for licensing information
 DEBUG = true
 
-local utils = require("experiments.utils")
-local deck = require("deck")
+local api = require("api")
+local sandbox = require("sandbox")
+local transfer = require("transfer")
+local utils = require("utils")
 
-function get_input(file_name)
-  -- Load input table
-  local inputs = require("inputs."..file_name)
-
-  return inputs
-end
+-- Constants
+local NEVER_RUN = -1
+local RUN_NOW = 0
+local SECONDS_PER_MINUTE = 60
 
 function write_result(result, file_name)
   -- TODO: Check if results/ is present, if not
@@ -25,85 +25,94 @@ function write_result(result, file_name)
   utils.serialize(result)
 end
 
-function start_experiment(name, experiment)
-  utils.pprint("Starting "..name)
-  --  this is a synchronous call, should we do it async?
-  success, experiment.results = coroutine.resume(experiment.exec, experiment.urls)
-
-  if not success then
-    -- throw exception
-    utils.pprint("Error in "..name)
+function is_time_to_run(experiment)
+  if experiment.next_run == NEVER_RUN then
+    return false
   end
-
-  experiment.last_run = os.time()
-
-  for _, result in pairs(experiment.results) do
-    write_result(result, experiment.output)
+  local current_time = os.time()
+  if current_time < experiment.next_run then
+    return false
   end
+  return true
 end
 
-function schedule(name, experiment)
-  utils.pprint("Scheduling "..name)
-
-  if experiment.rerun > 0 then
-    experiment.rerun = experiment.rerun-1
+function run_experiment(experiment)
+  -- Schedule the next run before we run the current one so that long-running
+  -- experiments still run approximiately on time for the next run.
+  if experiment.num_runs > 0 then
+    local interval = experiment.interval * SECONDS_PER_MINUTE
+    experiment.next_run = os.time() + interval
+    experiment.num_runs = experiment.num_runs - 1
+  else
+    experiment.next_run = NEVER_RUN
   end
 
-  if coroutine.status(experiment.exec) == "dead" then
-    -- TODO: this is repeated, maybe optimize it?
-    local exec = require("experiments."..name)
-    experiment.exec = coroutine.create(exec)
+  -- Now run the experiment.
+  -- TODO(sburnett): Implement scheduling.
+  sandboxed_api = api.new_instance(experiment)
+  local result, err = sandbox.run_file(experiment.path, sandboxed_api)
+  if err then
+    return "Error running experiment '" .. experiment.name .. "': " .. err
   end
+  return nil
 end
 
-function engine(experiments)
-  -- these are just speed optimizations, binding to local vars makes
-  -- them more efficient
-  local experiments = experiments
-  local next = next
-
-  while next(experiments) ~= nil do
-    -- iterate through each experiment
-    for name, experiment in pairs(experiments) do
-      -- convert interval to seconds
-      local interval = experiment.interval * 60
-
-      local start_time = experiment.last_run + interval
-
-      if start_time <= os.time() then
-        -- we run the experiment at least once, is that a good
-        -- assumption to make? for eg., if the user sets rerun = 0,
-        -- the experiment will still be run once
-        start_experiment(name, experiment)
-
-        -- check if we have to run this experiment again
-        if experiment.rerun == 0 then
-          experiments.remove(name)
-        else
-          schedule(name, experiment)
+function engine(configuration)
+  while next(configuration.experiments) ~= nil do  -- "While experiments isn't empty"
+    for name, experiment in pairs(configuration.experiments) do
+      if is_time_to_run(experiment) then
+        err = run_experiment(experiment)
+        if err then
+          utils.pprint(err)
         end
+      end
 
+      if experiment.next_run == NEVER_RUN then
+        configuration.experiments[name] = nil
+      end
+    end
+
+    -- Sleep for a bit so we don't spin too much.
+    -- TODO(sburnett): Use a proper scheduling library.
+    utils.sleep(1)
+  end
+end
+
+function load_configuration()
+  -- Load the list of experiments. This lua file should just return a table with
+  -- an "experiments" field, which itself is a table of names.
+  --
+  -- Because this runs outside an OS sandbox, it may be best to replace this
+  -- with something that just reads the names out of a file directly instead of
+  -- evaluating them as Lua code.
+  local result, err = sandbox.run_file("sandbox/main.lua", {})
+  if err then
+    utils.pprint("Err reading experiments list")
+    os.exit(1)
+  end
+
+  for name, experiment in pairs(result.experiments) do
+    if not sandbox.is_valid_module_name(name) then
+      utils.pprint("Invalid module name: " .. name)
+    else
+      experiment.name = name
+      experiment.path = "sandbox/" .. name .. ".lua"
+      if experiment.num_runs > 0 then
+        experiment.next_run = RUN_NOW
+        experiment.num_runs = experiment.num_runs - 1
+      else
+        experiment.next_run = NEVER_RUN
       end
     end
   end
+
+  return result
 end
 
-function bootstrap(experiments)
-  for name, experiment in pairs(experiments) do
-    experiment.last_run = os.time()
-    experiment.urls = get_input(experiment.input)
-
-    utils.pprint("Bootstrapping "..name)
-
-    local exec = require("experiments."..name)
-    experiment.exec = coroutine.create(exec)
-  end
+function main()
+  transfer.sync_sandbox()
+  local configuration = load_configuration()
+  engine(configuration)
 end
 
-function director()
-  local experiments = deck.experiments
-  bootstrap(experiments)
-  engine(experiments)
-end
-
-director()
+main()

@@ -33,21 +33,24 @@ function utils.serialize(o)
   --       and check if it errors, instead of just giving
   --       an error anyways
   if type(o) == "number" then
-    io.write(o)
+    return string.format("%d", o), nil
   elseif type(o) == "string" then
-    io.write(string.format("%q", o))
+    return string.format("%q", o), nil
   elseif type(o) == "table" then
-    io.write("{\n")
-    for k,v in pairs(o) do
-      io.write("  ", k, " = ")
-      utils.serialize(v)
-      io.write(",\n")
+    s = "{\n"
+    for k, v in pairs(o) do
+      c, err = utils.serialize(v)
+      if err then
+        return nil, err
+      end
+      s = s .. string.format(" %s = %s,\n", k, c)
     end
-    io.write("}\n")
+    s = s .. "}"
+    return s, nil
   elseif type(o) == "boolean" then
-    io.write(tostring(o))
+    return tostring(o), nil
   else
-    error("cannot serialize a " .. type(o))
+    return nil, "cannot serialize a " .. type(o)
   end
 end
 
@@ -55,6 +58,10 @@ function utils.pprint(data)
   if DEBUG == true then
     print(string.format("[%s] %s", os.date(), data))
   end
+end
+
+function utils.sleep(seconds)
+  assert(os.execute("sleep " .. tonumber(seconds)) == 0)
 end
 
 return utils
