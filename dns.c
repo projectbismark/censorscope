@@ -6,6 +6,7 @@
 
 static int l_dns_lookup(lua_State *L) {
     const char *domain_string = luaL_checkstring(L, 1);
+    const char *resolver_string = luaL_checkstring(L, 2);
 
     ldns_rdf *domain = ldns_dname_new_frm_str(domain_string);
     if (!domain) {
@@ -15,36 +16,38 @@ static int l_dns_lookup(lua_State *L) {
     }
 
     ldns_resolver *resolver;
-    /*ldns_status status = ldns_resolver_new_frm_file(&resolver, NULL);
-    if (status != LDNS_STATUS_OK) {
-        ldns_rdf_deep_free(domain);
-        lua_pushnil(L);
-        lua_pushstring(L, "error creating new resolver");
-        return 2;
-    }*/
-
-    resolver = ldns_resolver_new();
-    if (!resolver) {
-        ldns_rdf_deep_free(domain);
-        lua_pushnil(L);
-        lua_pushstring(L, "error creating new resolver");
-        return 2;
-    }
-    ldns_rdf *nameserver = ldns_rdf_new_frm_str(LDNS_RDF_TYPE_A, "8.8.8.8");
-    if (!nameserver) {
-        ldns_rdf_deep_free(domain);
-        ldns_resolver_deep_free(resolver);
-        lua_pushnil(L);
-        lua_pushstring(L, "error parsing nameserver address");
-        return 2;
-    }
-    ldns_status status = ldns_resolver_push_nameserver(resolver, nameserver);
-    if (status != LDNS_STATUS_OK) {
-        ldns_rdf_deep_free(domain);
-        ldns_resolver_deep_free(resolver);
-        lua_pushnil(L);
-        lua_pushstring(L, "error pushing nameserver address");
-        return 2;
+    if (strlen(resolver_string) == 0) {
+        ldns_status status = ldns_resolver_new_frm_file(&resolver, NULL);
+        if (status != LDNS_STATUS_OK) {
+            ldns_rdf_deep_free(domain);
+            lua_pushnil(L);
+            lua_pushstring(L, "error creating new resolver");
+            return 2;
+        }
+    } else {
+        resolver = ldns_resolver_new();
+        if (!resolver) {
+            ldns_rdf_deep_free(domain);
+            lua_pushnil(L);
+            lua_pushstring(L, "error creating new resolver");
+            return 2;
+        }
+        ldns_rdf *nameserver = ldns_rdf_new_frm_str(LDNS_RDF_TYPE_A, resolver_string);
+        if (!nameserver) {
+            ldns_rdf_deep_free(domain);
+            ldns_resolver_deep_free(resolver);
+            lua_pushnil(L);
+            lua_pushstring(L, "error parsing nameserver address");
+            return 2;
+        }
+        ldns_status status = ldns_resolver_push_nameserver(resolver, nameserver);
+        if (status != LDNS_STATUS_OK) {
+            ldns_rdf_deep_free(domain);
+            ldns_resolver_deep_free(resolver);
+            lua_pushnil(L);
+            lua_pushstring(L, "error pushing nameserver address");
+            return 2;
+        }
     }
 
     ldns_pkt *pkt = ldns_resolver_query(resolver,

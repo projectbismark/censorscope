@@ -42,11 +42,16 @@ function api_creater.new_instance(experiment)
   --
   -- Arguments:
   -- - domain is the domain name to look up.
+  -- - resolver is the nameserver to use. If omitted or an empty string, then
+  -- query the system default nameserver.
   -- Returns:
   -- - return first IPv4 address in the result, or nil on error.
   -- - an error message, or nil if no errors occurred.
-  function api.dns_lookup(domain)
-    return dns.dns_lookup(domain)
+  function api.dns_lookup(domain, resolver)
+    if resolver == nil then
+      resolver = ""
+    end
+    return dns.dns_lookup(domain, resolver)
   end
 
   -- Write a result to the current results file.
