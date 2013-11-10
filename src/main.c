@@ -8,9 +8,20 @@
 
 #include "sandbox.h"
 #include "scheduling.h"
+#include "transport.h"
 
 int main(int argc, char **argv) {
     fprintf(stderr, "Starting now.\n");
+
+    transport_t transport;
+    if (transport_init(&transport, "rsync")) {
+        fprintf(stderr, "Error initializing transport\n");
+        return 1;
+    }
+    if (transport_download(&transport)) {
+        fprintf(stderr, "Error initializing transport\n");
+        return 1;
+    }
 
     /* Load the experiments configuration from sandbox/main.lua. */
     sandbox_t sandbox;
@@ -40,6 +51,16 @@ int main(int argc, char **argv) {
 
     if (experiment_schedules_destroy(&schedules)) {
         fprintf(stderr, "Error destroying experiments.\n");
+        return 1;
+    }
+
+    if (transport_upload(&transport)) {
+        fprintf(stderr, "Error initializing transport\n");
+        return 1;
+    }
+
+    if (transport_destroy(&transport)) {
+        fprintf(stderr, "Error destroying transport\n");
         return 1;
     }
 

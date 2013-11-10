@@ -7,6 +7,7 @@ SRCS = \
 	$(SRC_DIR)/sandbox.c \
 	$(SRC_DIR)/register.c \
 	$(SRC_DIR)/scheduling.c \
+	$(SRC_DIR)/transport.c \
 	$(SRC_DIR)/util.c
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
