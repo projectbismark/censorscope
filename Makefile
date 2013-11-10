@@ -1,18 +1,28 @@
-CC=gcc
-OBJS=dns.o main.o sandbox.o register.o scheduling.o util.o
-EXE=censorscope
-CFLAGS=`pkg-config lua5.1 --cflags` -g -Wall -std=gnu99
-LDFLAGS=`pkg-config lua5.1 --libs` -lldns
+CC ?= gcc
+SRC_DIR ?= src
+BUILD_DIR ?= build
+SRCS = \
+	$(SRC_DIR)/dns.c \
+	$(SRC_DIR)/main.c \
+	$(SRC_DIR)/sandbox.c \
+	$(SRC_DIR)/register.c \
+	$(SRC_DIR)/scheduling.c \
+	$(SRC_DIR)/util.c
+OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
-LIBTOOL=libtool --tag=CC
+EXE = ?censorscope
+CFLAGS += `pkg-config lua5.1 --cflags` -g -Wall -std=gnu99
+LDFLAGS += `pkg-config lua5.1 --libs` -lldns
 
-.c.o:
+all: $(EXE)
+	echo $(BUILD_DIR)
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) $< -o $@
 
-censorscope: $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o $(EXE)
-
-all: censorscope
+$(EXE): $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $@
 
 clean:
 	rm -f $(OBJS)
