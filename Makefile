@@ -10,7 +10,7 @@ SRCS = \
 	$(SRC_DIR)/util.c
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
-EXE = ?censorscope
+EXE ?= censorscope
 CFLAGS += `pkg-config lua5.1 --cflags` -g -Wall -std=gnu99
 LDFLAGS += `pkg-config lua5.1 --libs` -lldns
 
