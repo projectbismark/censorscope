@@ -1,8 +1,8 @@
-local transfer = {}
+local rsync = {}
 
 local remote_hostname = "fill_in_hostname"
 
-function transfer.sync_sandbox()
+function rsync.sync_sandbox()
   local remote_path = remote_hostname .. ":censorscope-server/sandbox"
   local local_path = "sandbox"
 
@@ -12,7 +12,7 @@ function transfer.sync_sandbox()
   return nil
 end
 
-function transfer.upload_results()
+function rsync.upload_results()
   local remote_path = remote_hostname .. ":censorscope-server/results"
   local local_path = "results"
 
@@ -22,4 +22,4 @@ function transfer.upload_results()
   return nil
 end
 
-return transfer
+return rsync
