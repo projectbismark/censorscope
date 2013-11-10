@@ -4,7 +4,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-static int l_dns_lookup(lua_State *L) {
+int l_dns_lookup(lua_State *L) {
     const char *domain_string = luaL_checkstring(L, 1);
     const char *resolver_string = luaL_checkstring(L, 2);
 
@@ -86,14 +86,4 @@ static int l_dns_lookup(lua_State *L) {
     ldns_resolver_deep_free(resolver);
     lua_pushnil(L);
     return 2;
-}
-
-static const struct luaL_Reg dns_lib [] = {
-    {"dns_lookup", l_dns_lookup},
-    {NULL, NULL}
-};
-
-int luaopen_dns(lua_State *L) {
-    luaL_openlib(L, "dns", dns_lib, 0);
-    return 1;
 }

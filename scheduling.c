@@ -10,6 +10,8 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#include "dns.h"
+#include "register.h"
 #include "sandbox.h"
 
 #define NEVER_RUN -1
@@ -131,6 +133,10 @@ static int run_experiment(experiment_schedule_t *schedule) {
     sandbox_t sandbox;
     if (sandbox_init(&sandbox, 102400, 102400)) {
         fprintf(stderr, "Error initializing sandbox for '%s'\n", schedule->path);
+        return -1;
+    }
+    if (register_functions(&sandbox)) {
+        fprintf(stderr, "Error registering sandbox functions\n");
         return -1;
     }
     if (sandbox_run(&sandbox, schedule->path, "api.lua")) {

@@ -2,7 +2,6 @@ local run_id = os.date("%Y%m%d-%H%M%S")
 
 local api = {}
 
-dns = require('dns')
 sandbox = require("sandbox")
 utils = require("utils")
 
@@ -48,7 +47,7 @@ function api.dns_lookup(domain, resolver)
   if resolver == nil then
     resolver = ""
   end
-  return dns.dns_lookup(domain, resolver)
+  return dns_lookup(domain, resolver)
 end
 
 -- Write a result to the current results file.
