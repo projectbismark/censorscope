@@ -13,7 +13,7 @@ int run_in_sandbox(lua_State *L) {
     const char *module = luaL_checkstring(L, -1);
     char *filename = module_filename(module);
 
-    if (sandbox_run(sandbox, filename, "api.lua")) {
+    if (sandbox_run(sandbox, filename, "luasrc/api.lua")) {
         return luaL_error(L, "error running in sandbox");
     }
 

@@ -1,6 +1,7 @@
 #include "sandbox.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -81,6 +82,34 @@ static int is_valid_lua_script(const char *filename) {
     return 1;
 }
 
+/* A new entry to the packages search path.
+ *
+ * Adapted from http://stackoverflow.com/a/4156038.
+ *
+ * Arguments:
+ * - L is a Lua state.
+ * - new_entry should be an element of packages.path, like "luasrc/?.lua".
+ * Returns: 0 on success, -1 on failure.
+ *
+ */
+static int prepend_package_path(lua_State *L, const char* new_entry) {
+    lua_getglobal(L, "package");
+    lua_getfield(L, -1, "path");  // get field "path" from table at top of stack (-1)
+    const char *cur_path = lua_tostring(L, -1);  // grab path string from top of stack
+    int new_len = strlen(cur_path) + strlen(new_entry) + 1 + 1;
+    char *new_path = malloc(new_len);
+    if (!new_path) {
+        return -1;
+    }
+    snprintf(new_path, new_len, "%s;%s", new_entry, cur_path);
+    lua_pop(L, 1);
+    lua_pushstring(L, new_path);  // push the new one
+    free(new_path);
+    lua_setfield(L, -2, "path");  // set the field "path" in table at -2 with value at top of stack
+    lua_pop(L, 1);  // get rid of package table from top of stack
+    return 0;
+}
+
 int sandbox_init(sandbox_t *sandbox, int max_memory, int max_instructions) {
     sandbox->available_memory = max_memory;
     sandbox->L = lua_newstate(l_alloc_restricted, &sandbox->available_memory);
@@ -90,6 +119,15 @@ int sandbox_init(sandbox_t *sandbox, int max_memory, int max_instructions) {
     }
     lua_sethook(sandbox->L, exit_hook, LUA_MASKCOUNT, max_instructions);
     luaL_openlibs(sandbox->L);
+
+    /* Add luasrc/ to the path so that the script we evaluate to obtain the
+     * environment can easily reference files in the same directory. For
+     * example, we often use luasrc/api.lua for environment, and it should be
+     * able to import files from that directory. */
+    if (prepend_package_path(sandbox->L, "luasrc/?.lua")) {
+        fprintf(stderr, "Error setting packages.path\n");
+        return -1;
+    }
     return 0;
 }
 

@@ -139,7 +139,7 @@ static int run_experiment(experiment_schedule_t *schedule) {
         fprintf(stderr, "Error registering sandbox functions\n");
         return -1;
     }
-    if (sandbox_run(&sandbox, schedule->path, "api.lua")) {
+    if (sandbox_run(&sandbox, schedule->path, "luasrc/api.lua")) {
         fprintf(stderr, "Error running '%s'\n", schedule->path);
         return -1;
     }
