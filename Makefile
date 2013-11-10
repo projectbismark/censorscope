@@ -26,6 +26,7 @@ $(EXE): $(OBJS)
 
 clean:
 	rm -f $(OBJS)
+	rm -rf $(BUILD_DIR)
 
 clobber: clean
 	rm $(EXE)
