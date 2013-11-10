@@ -160,9 +160,19 @@ static int run_one_round(experiment_schedules_t *schedules) {
     return 0;
 }
 
+static int experiments_pending(experiment_schedules_t *schedules) {
+    for (int i = 0; i < schedules->count; ++i) {
+        if (schedules->schedules[i].next_run != NEVER_RUN) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int experiments_schedules_run(experiment_schedules_t *schedules) {
-    for(;;) {
+    while (experiments_pending(schedules)) {
         run_one_round(schedules);
         sleep(1);
     }
+    return 0;
 }
