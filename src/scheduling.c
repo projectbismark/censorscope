@@ -75,6 +75,12 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
         schedule->num_runs = luaL_checkinteger(L, -1);
         lua_pop(L, 1);
 
+        fprintf(stderr,
+                "Loaded experiment '%s' with interval %ld to run %ld times.\n",
+                schedule->experiment,
+                schedule->interval,
+                schedule->num_runs);
+
         if (schedule->num_runs > 0) {
             schedule->next_run = RUN_NOW;
             --schedule->num_runs;
@@ -87,12 +93,6 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
             perror("strdup");
             return -1;
         }
-
-        fprintf(stderr,
-                "Loaded experiment '%s' with interval %ld to run %ld times.\n",
-                schedule->experiment,
-                schedule->interval,
-                schedule->num_runs);
 
         lua_pop(L, 1);
         ++i;
