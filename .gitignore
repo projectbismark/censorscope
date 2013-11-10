@@ -1,2 +1,6 @@
 .#*
 results/
+*.un~
+.*.swp
+*.o
+censorscope
