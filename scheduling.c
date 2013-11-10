@@ -13,6 +13,7 @@
 #include "dns.h"
 #include "register.h"
 #include "sandbox.h"
+#include "util.h"
 
 #define NEVER_RUN -1
 #define RUN_NOW 0
@@ -61,6 +62,10 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
             perror("strdup");
             return -1;
         }
+        if (!is_valid_module_name(schedule->experiment)) {
+            fprintf(stderr, "invalid experiment name\n");
+            return -1;
+        }
 
         lua_getfield(L, -1, "interval");
         schedule->interval = luaL_checkinteger(L, -1);
@@ -77,12 +82,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
             schedule->next_run = NEVER_RUN;
         }
 
-        char filename[255];
-        snprintf(filename,
-                 sizeof(filename),
-                 "sandbox/%s.lua",
-                 schedule->experiment);
-        schedule->path = strdup(filename);
+        schedule->path = module_filename(schedule->experiment);
         if (!schedule->path) {
             perror("strdup");
             return -1;

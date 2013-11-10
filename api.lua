@@ -2,7 +2,6 @@ local run_id = os.date("%Y%m%d-%H%M%S")
 
 local api = {}
 
-sandbox = require("sandbox")
 utils = require("utils")
 
 -- Write a message to the debug log.
@@ -25,11 +24,7 @@ end
 -- - the result(s) of importing the module.
 -- - an error, or nil if no error occurred.
 function api.import(name)
-  if not sandbox.is_valid_module_name(name) then
-    return nil, "invalid module name"
-  end
-  local filename = "sandbox/" .. name .. ".lua"
-  return sandbox.run_file(filename, api)
+  return run_in_sandbox(name)
 end
 
 -- Perform a DNS lookup.

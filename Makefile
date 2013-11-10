@@ -1,5 +1,5 @@
 CC=gcc
-OBJS=dns.o main.o sandbox.o register.o scheduling.o
+OBJS=dns.o main.o sandbox.o register.o scheduling.o util.o
 EXE=censorscope
 CFLAGS=`pkg-config lua5.1 --cflags` -g -Wall -std=gnu99
 LDFLAGS=`pkg-config lua5.1 --libs` -lldns
