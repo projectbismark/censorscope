@@ -4,11 +4,12 @@
 
 To set up the development environment:
 
-    $ sudo apt-get install lua5.1
+    $ sudo apt-get install liblua5.1-dev libldns-dev
     $ git clone https://github.com/gsathya/censorscope.git
     $ cd censorscope/
+    $ make
     $ mkdir results
-    $ lua censorscope.lua
+    $ ./censorscope
 
 ### Contributing
 Please read the docs/HACKING file to understand the codebase.
