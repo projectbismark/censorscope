@@ -12,6 +12,7 @@
 int main(int argc, char **argv) {
     fprintf(stderr, "Starting now.\n");
 
+    /* Load the experiments configuration from sandbox/main.lua. */
     sandbox_t sandbox;
     if (sandbox_init(&sandbox, 102400, 1024)) {
         fprintf(stderr, "Error initializing sandbox.\n");
@@ -31,6 +32,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    /* Now run all the experiments in an event loop. */
     if (experiments_schedules_run(&schedules)) {
         fprintf(stderr, "Error running experiments.\n");
         return 1;

@@ -31,6 +31,10 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
 
 int experiment_schedules_destroy(experiment_schedules_t *schedules);
 
+/* Run experiments in an event loop. This function exits when there are no more
+ * experiments to run.
+ *
+ */
 int experiments_schedules_run(experiment_schedules_t *schedules);
 
 #endif
