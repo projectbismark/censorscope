@@ -22,10 +22,12 @@ int transport_init(transport_t *transport, const char *module) {
         fprintf(stderr,
                 "Error loading transport: %s\n",
                 luaL_checkstring(transport->L, -1));
+        free(filename);        
         transport_destroy(transport);
         return -1;
     }
 
+    free(filename);
     return 0;
 }
 
