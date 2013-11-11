@@ -19,8 +19,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (transport_download(&transport)) {
-        fprintf(stderr, "Error initializing transport\n");
-        return 1;
+        /* return */
     }
 
     /* Load the experiments configuration from sandbox/main.lua. */

@@ -22,7 +22,7 @@ int transport_init(transport_t *transport, const char *module) {
         fprintf(stderr,
                 "Error loading transport: %s\n",
                 luaL_checkstring(transport->L, -1));
-        free(filename);        
+        free(filename);
         transport_destroy(transport);
         return -1;
     }
@@ -37,7 +37,6 @@ int transport_download(transport_t *transport) {
         fprintf(stderr,
                 "Error downloading files: %s\n",
                 luaL_checkstring(transport->L, -1));
-        transport_destroy(transport);
         return -1;
     }
     return 0;
@@ -49,7 +48,6 @@ int transport_upload(transport_t *transport) {
         fprintf(stderr,
                 "Error uploading results: %s\n",
                 luaL_checkstring(transport->L, -1));
-        transport_destroy(transport);
         return -1;
     }
     return 0;
