@@ -3,7 +3,7 @@ SRC_DIR ?= src
 BUILD_DIR ?= build
 SRCS = \
 	$(SRC_DIR)/dns.c \
-	$(SRC_DIR)/main.c \
+	$(SRC_DIR)/censorscope.c \
 	$(SRC_DIR)/sandbox.c \
 	$(SRC_DIR)/register.c \
 	$(SRC_DIR)/scheduling.c \
