@@ -1,5 +1,7 @@
 #include "transport.h"
 
+#include <stdlib.h>
+
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -11,17 +13,21 @@ int transport_init(transport_t *transport, const char *module) {
     }
     luaL_openlibs(transport->L);
 
-    char filename[255];
-    snprintf(filename, sizeof(filename), "transports/%s.lua", module);
+    const size_t filename_len = snprintf(NULL, 0,
+                                         "transports/%s.lua", module) + 1;
+    char *filename = malloc(filename_len);
+    snprintf(filename, filename_len, "transports/%s.lua", module);
 
     if (luaL_dofile(transport->L, filename)) {
         fprintf(stderr,
                 "Error loading transport: %s\n",
                 luaL_checkstring(transport->L, -1));
-        lua_close(transport->L);
+        free(filename);
+        transport_destroy(transport);
         return -1;
     }
 
+    free(filename);
     return 0;
 }
 

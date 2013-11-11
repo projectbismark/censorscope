@@ -1,5 +1,7 @@
 #include "register.h"
 
+#include <stdlib.h>
+
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -17,6 +19,7 @@ int run_in_sandbox(lua_State *L) {
         return luaL_error(L, "error running in sandbox");
     }
 
+    free(filename);
     return 1;
 }
 
