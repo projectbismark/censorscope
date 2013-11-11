@@ -37,6 +37,7 @@ int transport_download(transport_t *transport) {
         fprintf(stderr,
                 "Error downloading files: %s\n",
                 luaL_checkstring(transport->L, -1));
+        lua_pop(transport->L, 1);
         return -1;
     }
     return 0;
@@ -48,6 +49,7 @@ int transport_upload(transport_t *transport) {
         fprintf(stderr,
                 "Error uploading results: %s\n",
                 luaL_checkstring(transport->L, -1));
+        lua_pop(transport->L, 1);
         return -1;
     }
     return 0;
