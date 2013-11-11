@@ -54,8 +54,7 @@ int main(int argc, char **argv) {
     }
 
     if (transport_upload(&transport)) {
-        fprintf(stderr, "Error initializing transport\n");
-        return 1;
+      /* return */
     }
 
     if (transport_destroy(&transport)) {
