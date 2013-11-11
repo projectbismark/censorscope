@@ -1,5 +1,7 @@
 #include "register.h"
 
+#include <stdlib.h>
+
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
