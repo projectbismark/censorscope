@@ -17,6 +17,7 @@ int run_in_sandbox(lua_State *L) {
         return luaL_error(L, "error running in sandbox");
     }
 
+    free(filename);
     return 1;
 }
 
