@@ -1,6 +1,6 @@
-#include <stdlib.h>
-
 #include "transport.h"
+
+#include <stdlib.h>
 
 #include "lua.h"
 #include "lauxlib.h"
