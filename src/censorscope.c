@@ -1,6 +1,9 @@
+#include "censorscope.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <event2/event.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -11,6 +14,11 @@
 #include "transport.h"
 
 int main(int argc, char **argv) {
+    base = event_base_new();
+    if (!base) {
+        fprintf(stderr, "Could not initialise libevent\n");
+    }
+
     fprintf(stderr, "Starting now.\n");
 
     transport_t transport;
@@ -42,16 +50,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    /* Now run all the experiments in an event loop. */
-    if (experiments_schedules_run(&schedules)) {
-        fprintf(stderr, "Error running experiments.\n");
-        return 1;
-    }
-
-    if (experiment_schedules_destroy(&schedules)) {
-        fprintf(stderr, "Error destroying experiments.\n");
-        return 1;
-    }
+    /* start the event loop */
+    event_base_dispatch(base);
 
     if (transport_upload(&transport)) {
       /* return */
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    fprintf(stderr, "Ran successfully.\n");
+    fprintf(stdout, "Ran successfully.\n");
 
     return 0;
 }
