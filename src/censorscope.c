@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    /* start the event loop */
     event_base_dispatch(base);
 
     if (transport_upload(&transport)) {
@@ -61,7 +62,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    fprintf(stderr, "Ran successfully.\n");
+    fprintf(stdout, "Ran successfully.\n");
 
     return 0;
 }

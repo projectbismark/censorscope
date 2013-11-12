@@ -100,7 +100,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
         schedule->num_runs = luaL_checkinteger(L, -1);
         lua_pop(L, 1);
 
-        fprintf(stderr,
+        fprintf(stdout,
                 "Loaded experiment '%s' with interval %ld to run %ld times.\n",
                 schedule->experiment,
                 schedule->interval,
