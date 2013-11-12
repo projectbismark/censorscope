@@ -114,12 +114,22 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
 
         /* schedule only experiments that we need to run */
         if (schedule->num_runs > 0) {
-            schedule->next_run->tv_sec = schedule->interval * SECONDS_PER_MINUTE;
-            schedule->next_run->tv_usec = 0;
-
             schedule->ev = event_new(base, -1, EV_TIMEOUT|EV_PERSIST,
                                      run_experiment, schedule);
-            event_add(schedule->ev, schedule->next_run);
+            if (!schedule->ev) {
+                fprintf(stderr, "Error calling event_new\n");
+                return -1;
+            }
+
+            struct timeval next_run;
+            next_run.tv_sec = schedule->interval;
+            next_run.tv_usec = 0;
+            if (event_add(schedule->ev, &next_run)) {
+                fprintf(stderr, "Error adding event.\n");
+                return -1;
+            }
+        } else {
+            schedule->ev = NULL;
         }
 
         lua_pop(L, 1);
@@ -132,6 +142,7 @@ int experiment_schedules_destroy(experiment_schedules_t *schedules) {
     for (int i = 0; i < schedules->count; ++i) {
         free(schedules->schedules[i].experiment);
         free(schedules->schedules[i].path);
+        event_free(schedules->schedules[i].ev);
     }
     free(schedules->schedules);
     return 0;

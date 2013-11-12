@@ -10,7 +10,6 @@ typedef struct {
     lua_Integer interval;
     lua_Integer num_runs;
     struct event *ev;
-    struct timeval *next_run;
     char *path;
 } experiment_schedule_t;
 
