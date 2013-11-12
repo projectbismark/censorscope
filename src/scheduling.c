@@ -5,11 +5,13 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+#include <event2/event.h>
 
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
 
+#include "censorscope.h"
 #include "dns.h"
 #include "register.h"
 #include "sandbox.h"
@@ -38,6 +40,29 @@ static int count_table_keys(lua_State *L, int table_index) {
         lua_pop(L, 1);
     }
     return count;
+}
+
+static void run_experiment(evutil_socket_t fd, short what, void *arg) {
+    experiment_schedule_t *schedule = arg;
+    if (schedule->num_runs == 0) {
+        event_del(schedule->ev);
+    } else {
+        schedule->num_runs--;
+    }
+
+    sandbox_t sandbox;
+    if (sandbox_init(&sandbox, 102400, 102400)) {
+        fprintf(stderr, "Error initializing sandbox for '%s'\n", schedule->path);
+    }
+    if (register_functions(&sandbox)) {
+        fprintf(stderr, "Error registering sandbox functions\n");
+    }
+    if (sandbox_run(&sandbox, schedule->path, "luasrc/api.lua")) {
+        fprintf(stderr, "Error running '%s'\n", schedule->path);
+    }
+    if (sandbox_destroy(&sandbox)) {
+        fprintf(stderr, "Error destorying sandbox for '%s'\n", schedule->path);
+    }
 }
 
 int experiment_schedules_init(experiment_schedules_t *schedules,
@@ -81,23 +106,25 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
                 schedule->interval,
                 schedule->num_runs);
 
-        if (schedule->num_runs > 0) {
-            schedule->next_run = RUN_NOW;
-            --schedule->num_runs;
-        } else {
-            schedule->next_run = NEVER_RUN;
-        }
-
         schedule->path = module_filename(schedule->experiment);
         if (!schedule->path) {
             perror("strdup");
             return -1;
         }
 
+        /* schedule only experiments that we need to run */
+        if (schedule->num_runs > 0) {
+            schedule->next_run->tv_sec = schedule->interval * SECONDS_PER_MINUTE;
+            schedule->next_run->tv_usec = 0;
+
+            schedule->ev = event_new(base, -1, EV_TIMEOUT|EV_PERSIST,
+                                     run_experiment, schedule);
+            event_add(schedule->ev, schedule->next_run);
+        }
+
         lua_pop(L, 1);
         ++i;
     }
-
     return 0;
 }
 
@@ -107,72 +134,5 @@ int experiment_schedules_destroy(experiment_schedules_t *schedules) {
         free(schedules->schedules[i].path);
     }
     free(schedules->schedules);
-    return 0;
-}
-
-static int is_time_to_run(experiment_schedule_t *schedule) {
-    if (schedule->next_run == NEVER_RUN) {
-        return 0;
-    }
-    time_t current_time = time(NULL);
-    if (current_time < schedule->next_run) {
-        return 0;
-    }
-    return 1;
-}
-
-static int run_experiment(experiment_schedule_t *schedule) {
-    if (schedule->num_runs > 0) {
-        time_t interval = schedule->interval * SECONDS_PER_MINUTE;
-        schedule->next_run = time(NULL) + interval;
-        --schedule->num_runs;
-    } else {
-        schedule->next_run = NEVER_RUN;
-    }
-
-    sandbox_t sandbox;
-    if (sandbox_init(&sandbox, 102400, 102400)) {
-        fprintf(stderr, "Error initializing sandbox for '%s'\n", schedule->path);
-        return -1;
-    }
-    if (register_functions(&sandbox)) {
-        fprintf(stderr, "Error registering sandbox functions\n");
-        return -1;
-    }
-    if (sandbox_run(&sandbox, schedule->path, "luasrc/api.lua")) {
-        fprintf(stderr, "Error running '%s'\n", schedule->path);
-        return -1;
-    }
-    if (sandbox_destroy(&sandbox)) {
-        fprintf(stderr, "Error destorying sandbox for '%s'\n", schedule->path);
-        return -1;
-    }
-    return 0;
-}
-
-static int run_one_round(experiment_schedules_t *schedules) {
-    for (int i = 0; i < schedules->count; ++i) {
-        experiment_schedule_t *schedule = &schedules->schedules[i];
-        if (is_time_to_run(schedule)) {
-            run_experiment(schedule);
-        }
-    }
-    return 0;
-}
-
-static int experiments_pending(experiment_schedules_t *schedules) {
-    for (int i = 0; i < schedules->count; ++i) {
-        if (schedules->schedules[i].next_run != NEVER_RUN) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-int experiments_schedules_run(experiment_schedules_t *schedules) {
-    while (experiments_pending(schedules)) {
-        run_one_round(schedules);
-        sleep(1);
-    }
     return 0;
 }
