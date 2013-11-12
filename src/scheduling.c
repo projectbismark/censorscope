@@ -122,7 +122,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
             }
 
             struct timeval next_run;
-            next_run.tv_sec = schedule->interval;
+            next_run.tv_sec = schedule->interval * SECONDS_PER_MINUTE;
             next_run.tv_usec = 0;
             if (event_add(schedule->ev, &next_run)) {
                 fprintf(stderr, "Error adding event.\n");
