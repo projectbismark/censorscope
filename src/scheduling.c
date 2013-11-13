@@ -77,6 +77,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
                                   sizeof(experiment_schedule_t));
     if (!schedules->schedules) {
         perror("error allocating experiment schedules");
+        lua_pop(L, 1);  /* Pop the experiments table. */
         return -1;
     }
 
@@ -87,10 +88,12 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
         schedule->experiment = strdup(luaL_checkstring(L, -2));
         if (!schedule->experiment) {
             perror("strdup");
+            lua_pop(L, 3);  /* Pop key, value, and experiments table. */
             return -1;
         }
         if (!is_valid_module_name(schedule->experiment)) {
             fprintf(stderr, "invalid experiment name\n");
+            lua_pop(L, 3);  /* Pop key, value, and experiments table. */
             return -1;
         }
 
@@ -111,6 +114,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
         schedule->path = module_filename(schedule->experiment);
         if (!schedule->path) {
             perror("strdup");
+            lua_pop(L, 3);  /* Pop key, value, and experiments table. */
             return -1;
         }
 
@@ -120,6 +124,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
                                      run_experiment, schedule);
             if (!schedule->ev) {
                 fprintf(stderr, "Error calling event_new\n");
+                lua_pop(L, 3);  /* Pop key, value, and experiments table. */
                 return -1;
             }
 
@@ -128,6 +133,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
             next_run.tv_usec = 0;
             if (event_add(schedule->ev, &next_run)) {
                 fprintf(stderr, "Error adding event.\n");
+                lua_pop(L, 3);  /* Pop key, value, and experiments table. */
                 return -1;
             }
         } else {
