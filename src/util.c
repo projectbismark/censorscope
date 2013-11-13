@@ -21,7 +21,7 @@ char *module_filename(const char *module) {
     if (!filename) {
         return NULL;
     }
-    if (snprintf(filename, filename_len, pattern, module) != filename_len) {
+    if (snprintf(filename, filename_len + 1, pattern, module) != filename_len) {
         return NULL;
     }
     return filename;
