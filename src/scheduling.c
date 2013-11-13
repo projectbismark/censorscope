@@ -12,7 +12,6 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-#include "censorscope.h"
 #include "dns.h"
 #include "register.h"
 #include "sandbox.h"
