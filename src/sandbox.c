@@ -9,6 +9,15 @@
 
 #define BYTECODE_MAGIC_NUMBER 27
 
+/* Copied from lauxlib.c */
+static int panic (lua_State *L) {
+    (void)L;  /* to avoid warnings */
+    fprintf(stderr,
+            "PANIC: unprotected error in call to Lua API (%s)\n",
+            lua_tostring(L, -1));
+    return 0;
+}
+
 /* This is an allocation function that artificially limits the pool of memory
  * available to scripts allocate.
  *
@@ -117,6 +126,7 @@ int sandbox_init(sandbox_t *sandbox, int max_memory, int max_instructions) {
         fprintf(stderr, "Error calling luaL_newstate\n");
         return -1;
     }
+    lua_atpanic(sandbox->L, &panic);
     lua_sethook(sandbox->L, exit_hook, LUA_MASKCOUNT, max_instructions);
     luaL_openlibs(sandbox->L);
 
