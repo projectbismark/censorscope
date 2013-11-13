@@ -7,7 +7,7 @@ struct event_base;
 
 typedef struct {
     char *experiment;
-    lua_Integer interval;
+    lua_Integer interval_seconds;
     lua_Integer num_runs;
     struct event *ev;
     char *path;

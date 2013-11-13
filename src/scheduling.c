@@ -17,8 +17,6 @@
 #include "sandbox.h"
 #include "util.h"
 
-#define SECONDS_PER_MINUTE 60
-
 /* Return the total number of keys in a table. Adapted from
  * http://www.lua.org/manual/5.1/manual.html#lua_next
  *
@@ -66,7 +64,7 @@ static void run_experiment(evutil_socket_t fd, short what, void *arg) {
 static int experiment_schedule_init(experiment_schedule_t *schedule,
                                     struct event_base *base,
                                     const char *name,
-                                    int interval,
+                                    int interval_seconds,
                                     int num_runs) {
     if (!is_valid_module_name(name)) {
         fprintf(stderr, "invalid experiment name\n");
@@ -78,7 +76,7 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
         perror("strdup");
         return -1;
     }
-    schedule->interval = interval;
+    schedule->interval_seconds = interval_seconds;
     schedule->num_runs = num_runs;
 
     schedule->path = module_filename(name);
@@ -99,7 +97,7 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
         }
 
         struct timeval next_run;
-        next_run.tv_sec = interval * SECONDS_PER_MINUTE;
+        next_run.tv_sec = interval_seconds;
         next_run.tv_usec = 0;
         if (event_add(schedule->ev, &next_run)) {
             fprintf(stderr, "Error adding event.\n");
@@ -112,7 +110,7 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
     fprintf(stdout,
             "Loaded experiment '%s' with interval %ld to run %ld times.\n",
             schedule->experiment,
-            schedule->interval,
+            schedule->interval_seconds,
             schedule->num_runs);
 
     return 0;
@@ -148,7 +146,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
         if (experiment_schedule_init(&schedules->schedules[i],
                                      base,
                                      luaL_checkstring(L, -2),
-                                     checkfield_integer(L, -1, "interval"),
+                                     checkfield_integer(L, -1, "interval_seconds"),
                                      checkfield_integer(L, -1, "num_runs"))) {
             fprintf(stderr, "Error initializing experiment");
             lua_pop(L, 3);  /* Pop value, key, and experiments table. */
