@@ -1,9 +1,9 @@
 #ifndef CENSORSCOPE_SCHEDULING_H
 #define CENSORSCOPE_SCHEDULING_H
 
-#include <time.h>
-
 #include "lua.h"
+
+struct event_base;
 
 typedef struct {
     char *experiment;
@@ -25,6 +25,7 @@ typedef struct {
  *
  */
 int experiment_schedules_init(experiment_schedules_t *schedules,
+                              struct event_base *base,
                               lua_State *L,
                               int table_index);
 

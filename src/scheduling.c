@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+
 #include <event2/event.h>
 
 #include "lua.h"
@@ -66,6 +67,7 @@ static void run_experiment(evutil_socket_t fd, short what, void *arg) {
 }
 
 int experiment_schedules_init(experiment_schedules_t *schedules,
+                              struct event_base *base,
                               lua_State *L,
                               int table_index) {
     lua_getfield(L, table_index, "experiments");

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <event2/event.h>
 
 #include "lua.h"
@@ -14,9 +15,10 @@
 #include "transport.h"
 
 int main(int argc, char **argv) {
-    base = event_base_new();
+    struct event_base *base = event_base_new();
     if (!base) {
         fprintf(stderr, "Could not initialise libevent\n");
+        return 1;
     }
 
     fprintf(stderr, "Starting now.\n");
@@ -41,7 +43,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     experiment_schedules_t schedules;
-    if (experiment_schedules_init(&schedules, sandbox.L, 1)) {
+    if (experiment_schedules_init(&schedules, base, sandbox.L, 1)) {
         fprintf(stderr, "Error initializing experiments schedule.\n");
         return 1;
     }
