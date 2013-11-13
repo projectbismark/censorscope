@@ -17,8 +17,6 @@
 #include "sandbox.h"
 #include "util.h"
 
-#define NEVER_RUN -1
-#define RUN_NOW 0
 #define SECONDS_PER_MINUTE 60
 
 /* Return the total number of keys in a table. Adapted from
@@ -65,6 +63,70 @@ static void run_experiment(evutil_socket_t fd, short what, void *arg) {
     }
 }
 
+static int experiment_schedule_init(experiment_schedule_t *schedule,
+                                    struct event_base *base,
+                                    const char *name,
+                                    int interval,
+                                    int num_runs) {
+    if (!is_valid_module_name(name)) {
+        fprintf(stderr, "invalid experiment name\n");
+        return -1;
+    }
+
+    schedule->experiment = strdup(name);
+    if (!schedule->experiment) {
+        perror("strdup");
+        return -1;
+    }
+    schedule->interval = interval;
+    schedule->num_runs = num_runs;
+
+    schedule->path = module_filename(name);
+    if (!schedule->path) {
+        perror("strdup");
+        return -1;
+    }
+
+    if (schedule->num_runs > 0) {
+        schedule->ev = event_new(base,
+                                 -1,
+                                 EV_TIMEOUT | EV_PERSIST,
+                                 run_experiment,
+                                 schedule);
+        if (!schedule->ev) {
+            fprintf(stderr, "Error calling event_new\n");
+            return -1;
+        }
+
+        struct timeval next_run;
+        next_run.tv_sec = interval * SECONDS_PER_MINUTE;
+        next_run.tv_usec = 0;
+        if (event_add(schedule->ev, &next_run)) {
+            fprintf(stderr, "Error adding event.\n");
+            return -1;
+        }
+    } else {
+        schedule->ev = NULL;
+    }
+
+    fprintf(stdout,
+            "Loaded experiment '%s' with interval %ld to run %ld times.\n",
+            schedule->experiment,
+            schedule->interval,
+            schedule->num_runs);
+
+    return 0;
+}
+
+static lua_Integer checkfield_integer(lua_State *L,
+                                      int table_index,
+                                      const char *key) {
+    lua_getfield(L, table_index, key);
+    lua_Integer value = luaL_checkinteger(L, -1);
+    lua_pop(L, 1);
+    return value;
+}
+
 int experiment_schedules_init(experiment_schedules_t *schedules,
                               struct event_base *base,
                               lua_State *L,
@@ -83,65 +145,22 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
     int i = 0;
     lua_pushnil(L);  /* first key */
     while (lua_next(L, -2) != 0) {
-        experiment_schedule_t *schedule = &schedules->schedules[i];
-        schedule->experiment = strdup(luaL_checkstring(L, -2));
-        if (!schedule->experiment) {
-            perror("strdup");
-            lua_pop(L, 3);  /* Pop key, value, and experiments table. */
-            return -1;
-        }
-        if (!is_valid_module_name(schedule->experiment)) {
-            fprintf(stderr, "invalid experiment name\n");
-            lua_pop(L, 3);  /* Pop key, value, and experiments table. */
+        if (experiment_schedule_init(&schedules->schedules[i],
+                                     base,
+                                     luaL_checkstring(L, -2),
+                                     checkfield_integer(L, -1, "interval"),
+                                     checkfield_integer(L, -1, "num_runs"))) {
+            fprintf(stderr, "Error initializing experiment");
+            lua_pop(L, 3);  /* Pop value, key, and experiments table. */
             return -1;
         }
 
-        lua_getfield(L, -1, "interval");
-        schedule->interval = luaL_checkinteger(L, -1);
-        lua_pop(L, 1);
-
-        lua_getfield(L, -1, "num_runs");
-        schedule->num_runs = luaL_checkinteger(L, -1);
-        lua_pop(L, 1);
-
-        fprintf(stdout,
-                "Loaded experiment '%s' with interval %ld to run %ld times.\n",
-                schedule->experiment,
-                schedule->interval,
-                schedule->num_runs);
-
-        schedule->path = module_filename(schedule->experiment);
-        if (!schedule->path) {
-            perror("strdup");
-            lua_pop(L, 3);  /* Pop key, value, and experiments table. */
-            return -1;
-        }
-
-        /* schedule only experiments that we need to run */
-        if (schedule->num_runs > 0) {
-            schedule->ev = event_new(base, -1, EV_TIMEOUT|EV_PERSIST,
-                                     run_experiment, schedule);
-            if (!schedule->ev) {
-                fprintf(stderr, "Error calling event_new\n");
-                lua_pop(L, 3);  /* Pop key, value, and experiments table. */
-                return -1;
-            }
-
-            struct timeval next_run;
-            next_run.tv_sec = schedule->interval * SECONDS_PER_MINUTE;
-            next_run.tv_usec = 0;
-            if (event_add(schedule->ev, &next_run)) {
-                fprintf(stderr, "Error adding event.\n");
-                lua_pop(L, 3);  /* Pop key, value, and experiments table. */
-                return -1;
-            }
-        } else {
-            schedule->ev = NULL;
-        }
-
-        lua_pop(L, 1);
+        lua_pop(L, 1);  /* Pop value. Leave key for lua_next. */
         ++i;
     }
+
+    lua_pop(L, 1);  /* Pop the experiments table. */
+
     return 0;
 }
 
