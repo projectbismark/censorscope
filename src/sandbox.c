@@ -156,14 +156,12 @@ int sandbox_run(sandbox_t *sandbox,
     /* Load (but not evaluate) the code to run in the sandbox. */
     if (luaL_loadfile(sandbox->L, filename)) {
         fprintf(stderr, "%s\n", lua_tostring(sandbox->L, -1));
-        lua_close(sandbox->L);
         return -1;
     }
     if (environment) {
         /* Load (but not evaluate) the code that creates the environment. */
         if (luaL_loadfile(sandbox->L, environment)) {
             fprintf(stderr, "%s", lua_tostring(sandbox->L, -1));
-            lua_close(sandbox->L);
             return -1;
         }
         /* Add SCRIPT_FILENAME to the environment so the environment can know
@@ -175,7 +173,6 @@ int sandbox_run(sandbox_t *sandbox,
          * removes the the code and replaces it with the environment's table. */
         if (lua_pcall(sandbox->L, 0, 1, 0)) {
             fprintf(stderr, "%s\n", lua_tostring(sandbox->L, -1));
-            lua_close(sandbox->L);
             return -1;
         }
     } else {
@@ -187,7 +184,6 @@ int sandbox_run(sandbox_t *sandbox,
      * environment off the top of the stack. */
     if (lua_setfenv(sandbox->L, -2) != 1) {
         fprintf(stderr, "%s\n", lua_tostring(sandbox->L, -1));
-        lua_close(sandbox->L);
         return -1;
     }
     /* Evaluate the sandbox function, which is now at the top of the stack. */
@@ -196,7 +192,6 @@ int sandbox_run(sandbox_t *sandbox,
                 "error running %s: %s\n",
                 filename,
                 lua_tostring(sandbox->L, -1));
-        lua_close(sandbox->L);
         return -1;
     }
 
