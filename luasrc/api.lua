@@ -45,6 +45,18 @@ function api.dns_lookup(domain, resolver)
   return dns_lookup(domain, resolver)
 end
 
+-- Perform a HTTP GET request.
+--
+--
+-- Arguments:
+-- - a url to connect to
+-- Returns:
+-- - return first IPv4 address in the result, or nil on error.
+-- - an error message, or nil if no errors occurred.
+function api.http_get(url)
+  return http_get(url)
+end
+
 -- Write a result to the current results file.
 --
 -- Each run on an experiment has one result file. This function appends to it.
