@@ -1,3 +1,5 @@
+#include "dns.h"
+
 #include <ldns/ldns.h>
 
 #define LUALIB
