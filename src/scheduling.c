@@ -49,12 +49,17 @@ static void run_experiment(evutil_socket_t fd, short what, void *arg) {
     sandbox_t sandbox;
     if (sandbox_init(&sandbox, 102400, 102400)) {
         fprintf(stderr, "Error initializing sandbox for '%s'\n", schedule->path);
+        return;
     }
     if (register_functions(&sandbox)) {
         fprintf(stderr, "Error registering sandbox functions\n");
+        sandbox_destroy(&sandbox);
+        return;
     }
     if (sandbox_run(&sandbox, schedule->path, "luasrc/api.lua")) {
         fprintf(stderr, "Error running '%s'\n", schedule->path);
+        sandbox_destroy(&sandbox);
+        return;
     }
     if (sandbox_destroy(&sandbox)) {
         fprintf(stderr, "Error destorying sandbox for '%s'\n", schedule->path);
