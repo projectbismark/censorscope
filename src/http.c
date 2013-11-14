@@ -23,9 +23,6 @@ http_request_done(struct evhttp_request *req, void *ctx)
   int nread;
 
   if (req == NULL) {
-    /* If req is NULL, it means an error occurred, but
-     * sadly we are mostly left guessing what the error
-     * might have been.  We'll do our best... */
     int printed_err = 0;
     int errcode = EVUTIL_SOCKET_ERROR();
     fprintf(stderr, "some request failed - no idea which one though!\n");

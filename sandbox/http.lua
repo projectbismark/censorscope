@@ -1,4 +1,4 @@
-local urls = import("alexa_100")
+local urls = import("http_urls")
 
 for _, url in pairs(urls) do
   log("Connecting to " .. url)
