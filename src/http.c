@@ -14,13 +14,13 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *arg)
 {
     lua_State *L = arg;
     const size_t data_len = size*nmemb;
-    char *response = malloc(data_len +2);
+    char *response = malloc(data_len + 2);
 
     memcpy(response, ptr, data_len);
     response[data_len] = '\0';
 
     printf("%s\n",response);
-    /* lua_pushstring(L, "foo"); */
+    lua_pushstring(L, "foo");
 
     free(response);
     return data_len;
@@ -51,7 +51,7 @@ int l_http_get(lua_State *L) {
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
 
     /* pass the Lua stack to the write function */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEHEADER, L);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, L);
 
     /* perform the request */
     res = curl_easy_perform(curl_handle);
