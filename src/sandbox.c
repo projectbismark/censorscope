@@ -119,7 +119,10 @@ static int prepend_package_path(lua_State *L, const char* new_entry) {
     return 0;
 }
 
-int sandbox_init(sandbox_t *sandbox, int max_memory, int max_instructions) {
+int sandbox_init(sandbox_t *sandbox,
+                 const char *name,
+                 int max_memory,
+                 int max_instructions) {
     sandbox->available_memory = max_memory;
     sandbox->L = lua_newstate(l_alloc_restricted, &sandbox->available_memory);
     if (!sandbox->L) {
@@ -129,6 +132,8 @@ int sandbox_init(sandbox_t *sandbox, int max_memory, int max_instructions) {
     lua_atpanic(sandbox->L, &panic);
     lua_sethook(sandbox->L, exit_hook, LUA_MASKCOUNT, max_instructions);
     luaL_openlibs(sandbox->L);
+    lua_pushstring(sandbox->L, name);
+    lua_setglobal(sandbox->L, "SANDBOX_NAME");
 
     /* Add luasrc/ to the path so that the script we evaluate to obtain the
      * environment can easily reference files in the same directory. For
@@ -164,10 +169,6 @@ int sandbox_run(sandbox_t *sandbox,
             fprintf(stderr, "%s", lua_tostring(sandbox->L, -1));
             return -1;
         }
-        /* Add SCRIPT_FILENAME to the environment so the environment can know
-         * which experiment it is running under. */
-        lua_pushstring(sandbox->L, filename);
-        lua_setglobal(sandbox->L, "SCRIPT_FILENAME");
 
         /* Evaluate the environment. (Its code is at the top of the stack.) This
          * removes the the code and replaces it with the environment's table. */

@@ -57,8 +57,7 @@ end
 function api.write_result(output)
   -- TODO: Check if results/ is present, if not
   --       create it
-  local experiment_name = string.match(SCRIPT_FILENAME, "([^/]+).lua$")
-  local filename = string.format("results/%s-%s.txt", experiment_name, run_id)
+  local filename = string.format("results/%s-%s.txt", SANDBOX_NAME, run_id)
   utils.pprint("writing results to " .. filename)
 
   local handle, err = io.open(filename, "a")

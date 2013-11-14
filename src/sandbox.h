@@ -12,6 +12,8 @@ typedef struct {
  * instruction count constraints.
  *
  * Arguments:
+ * - name is a name for the sandbox, which will be exposed when evaluating the
+ *   environment.
  * - max_memory is the total amount of memory available to the interpreter for
  *   evaluating the environment and running the sandboxed code.
  * - max_instructions is the total number of instructions available to evaluate
@@ -24,7 +26,10 @@ typedef struct {
  * Returns: 0 on success, -1 on failure.
  *
  */
-int sandbox_init(sandbox_t *sandbox, int max_memory, int max_instructions);
+int sandbox_init(sandbox_t *sandbox,
+                 const char *name,
+                 int max_memory,
+                 int max_instructions);
 
 int sandbox_destroy(sandbox_t *sandbox);
 

@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 
     /* Load the experiments configuration from sandbox/main.lua. */
     sandbox_t sandbox;
-    if (sandbox_init(&sandbox, 102400, 1024)) {
+    if (sandbox_init(&sandbox, "main", 102400, 1024)) {
         fprintf(stderr, "Error initializing sandbox.\n");
         return 1;
     }
