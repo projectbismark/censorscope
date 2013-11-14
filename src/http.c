@@ -6,7 +6,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include <event2/bufferevent_ssl.h>
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 #include <event2/listener.h>
@@ -14,7 +13,6 @@
 #include <event2/http.h>
 
 #define LUALIB
-#include "lua.h"
 #include "lauxlib.h"
 #include "censorscope.h"
 
@@ -39,9 +37,9 @@ http_request_done(struct evhttp_request *req, void *ctx)
     return;
   }
 
-  fprintf(stderr, "Response line: %d %s\n",
-      evhttp_request_get_response_code(req),
-      evhttp_request_get_response_code_line(req));
+  /* fprintf(stderr, "Response line: %d %s\n", */
+  /*     evhttp_request_get_response_code(req), */
+  /*     evhttp_request_get_response_code_line(req)); */
 
   while ((nread = evbuffer_remove(evhttp_request_get_input_buffer(req),
         buffer, sizeof(buffer)))
@@ -60,7 +58,6 @@ int l_http_get(lua_State *L) {
     char uri[256];
     int port;
 
-    struct bufferevent *bev;
     struct evhttp_connection *evcon;
     struct evhttp_request *req;
     struct evkeyvalq *output_headers;
@@ -106,14 +103,11 @@ int l_http_get(lua_State *L) {
     }
     uri[sizeof(uri) - 1] = '\0';
 
-    if (strcasecmp(scheme, "http") == 0) {
-        bev = bufferevent_socket_new(base, -1, BEV_OPT_CLOSE_ON_FREE);
-    }
 
     // For simplicity, we let DNS resolution block. Everything else should be
     // asynchronous though.
-    evcon = evhttp_connection_base_bufferevent_new(base, NULL, bev,
-                                                   host, port);
+    evcon = evhttp_connection_base_new(base, NULL,
+                                       host, port);
     if (evcon == NULL) {
         lua_pushnil(L);
         lua_pushstring(L, "evhttp_connection_base_bufferevent_new() failed\n");
@@ -121,7 +115,7 @@ int l_http_get(lua_State *L) {
     }
 
     // Fire off the request
-    req = evhttp_request_new(http_request_done, bev);
+    req = evhttp_request_new(http_request_done, base);
     if (req == NULL) {
         lua_pushnil(L);
         lua_pushstring(L, "evhttp_request_new() failed\n");
