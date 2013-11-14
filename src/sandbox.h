@@ -5,7 +5,7 @@
 
 typedef struct {
     lua_State *L;
-    int available_memory;
+    size_t available_memory;
 } sandbox_t;
 
 /* Initialize a sandbox, which you can use to run Lua code with memory and
@@ -28,7 +28,7 @@ typedef struct {
  */
 int sandbox_init(sandbox_t *sandbox,
                  const char *name,
-                 int max_memory,
+                 size_t max_memory,
                  int max_instructions);
 
 int sandbox_destroy(sandbox_t *sandbox);

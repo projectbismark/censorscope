@@ -27,21 +27,24 @@ static int panic (lua_State *L) {
  *
  */
 static void *l_alloc_restricted(void *ud, void *ptr, size_t osize, size_t nsize) {
-    int *available = (int *)ud;
+    size_t *available = (size_t *)ud;
 
     if (nsize == 0) {  /* free */
         free(ptr);
         *available += osize;  /* reclaim memory */
         return NULL;
     } else {  /* malloc */
-        int extra_memory = nsize - osize;
-        if (*available < extra_memory) {  /* too much memory in use */
+        if (nsize > osize && *available < (nsize - osize)) {
             fprintf(stderr, "Out of memory!\n");
             return NULL;
         }
         ptr = realloc(ptr, nsize);
         if (ptr) {  /* reallocation successful? */
-            *available -= extra_memory;
+            if (nsize > osize) {
+                *available -= (nsize - osize);
+            } else {
+                *available += (osize - nsize);
+            }
         }
         return ptr;
     }
@@ -121,7 +124,7 @@ static int prepend_package_path(lua_State *L, const char* new_entry) {
 
 int sandbox_init(sandbox_t *sandbox,
                  const char *name,
-                 int max_memory,
+                 size_t max_memory,
                  int max_instructions) {
     sandbox->available_memory = max_memory;
     sandbox->L = lua_newstate(l_alloc_restricted, &sandbox->available_memory);
