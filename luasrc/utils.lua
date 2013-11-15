@@ -26,9 +26,10 @@ function utils.split(str, pat)
   return t
 end
 
-function utils.pprint(data)
+function utils.pprint(format, ...)
+  DEBUG = true
   if DEBUG == true then
-    print(string.format("[%s] %s", os.date(), data))
+    print(string.format("[%s] " .. format, os.date(), unpack(arg)))
   end
 end
 
