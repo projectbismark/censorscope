@@ -1,8 +1,8 @@
 local M = {}
 
 M.experiments = {
-  lookup_alexa_domains = {
-    interval = 60,
+  lookup_sample_domains = {
+    interval_seconds = 0,
     num_runs = 1,
   },
 }

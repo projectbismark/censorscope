@@ -13,8 +13,8 @@ utils = require("utils")
 -- Arguments:
 -- - message is the message to log.
 -- Returns: none
-function api.log(message)
-  utils.pprint(message)
+function api.log(...)
+  utils.pprint(unpack(arg))
 end
 
 -- Load a module from the sandboxed module directory.
@@ -57,9 +57,8 @@ end
 function api.write_result(output)
   -- TODO: Check if results/ is present, if not
   --       create it
-  local experiment_name = string.match(SCRIPT_FILENAME, "([^/]+).lua$")
-  local filename = string.format("results/%s-%s.txt", experiment_name, run_id)
-  utils.pprint("writing results to " .. filename)
+  local filename = string.format("results/%s-%s.txt", SANDBOX_NAME, run_id)
+  utils.pprint("writing results to %s", filename)
 
   local handle, err = io.open(filename, "a")
   if err then

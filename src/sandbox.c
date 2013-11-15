@@ -9,6 +9,15 @@
 
 #define BYTECODE_MAGIC_NUMBER 27
 
+/* Copied from lauxlib.c */
+static int panic (lua_State *L) {
+    (void)L;  /* to avoid warnings */
+    fprintf(stderr,
+            "PANIC: unprotected error in call to Lua API (%s)\n",
+            lua_tostring(L, -1));
+    return 0;
+}
+
 /* This is an allocation function that artificially limits the pool of memory
  * available to scripts allocate.
  *
@@ -18,21 +27,24 @@
  *
  */
 static void *l_alloc_restricted(void *ud, void *ptr, size_t osize, size_t nsize) {
-    int *available = (int *)ud;
+    size_t *available = (size_t *)ud;
 
     if (nsize == 0) {  /* free */
         free(ptr);
         *available += osize;  /* reclaim memory */
         return NULL;
     } else {  /* malloc */
-        int extra_memory = nsize - osize;
-        if (*available < extra_memory) {  /* too much memory in use */
+        if (nsize > osize && *available < (nsize - osize)) {
             fprintf(stderr, "Out of memory!\n");
             return NULL;
         }
         ptr = realloc(ptr, nsize);
         if (ptr) {  /* reallocation successful? */
-            *available -= extra_memory;
+            if (nsize > osize) {
+                *available -= (nsize - osize);
+            } else {
+                *available += (osize - nsize);
+            }
         }
         return ptr;
     }
@@ -110,15 +122,21 @@ static int prepend_package_path(lua_State *L, const char* new_entry) {
     return 0;
 }
 
-int sandbox_init(sandbox_t *sandbox, int max_memory, int max_instructions) {
+int sandbox_init(sandbox_t *sandbox,
+                 const char *name,
+                 size_t max_memory,
+                 int max_instructions) {
     sandbox->available_memory = max_memory;
     sandbox->L = lua_newstate(l_alloc_restricted, &sandbox->available_memory);
     if (!sandbox->L) {
         fprintf(stderr, "Error calling luaL_newstate\n");
         return -1;
     }
+    lua_atpanic(sandbox->L, &panic);
     lua_sethook(sandbox->L, exit_hook, LUA_MASKCOUNT, max_instructions);
     luaL_openlibs(sandbox->L);
+    lua_pushstring(sandbox->L, name);
+    lua_setglobal(sandbox->L, "SANDBOX_NAME");
 
     /* Add luasrc/ to the path so that the script we evaluate to obtain the
      * environment can easily reference files in the same directory. For
@@ -146,26 +164,19 @@ int sandbox_run(sandbox_t *sandbox,
     /* Load (but not evaluate) the code to run in the sandbox. */
     if (luaL_loadfile(sandbox->L, filename)) {
         fprintf(stderr, "%s\n", lua_tostring(sandbox->L, -1));
-        lua_close(sandbox->L);
         return -1;
     }
     if (environment) {
         /* Load (but not evaluate) the code that creates the environment. */
         if (luaL_loadfile(sandbox->L, environment)) {
             fprintf(stderr, "%s", lua_tostring(sandbox->L, -1));
-            lua_close(sandbox->L);
             return -1;
         }
-        /* Add SCRIPT_FILENAME to the environment so the environment can know
-         * which experiment it is running under. */
-        lua_pushstring(sandbox->L, filename);
-        lua_setglobal(sandbox->L, "SCRIPT_FILENAME");
 
         /* Evaluate the environment. (Its code is at the top of the stack.) This
          * removes the the code and replaces it with the environment's table. */
         if (lua_pcall(sandbox->L, 0, 1, 0)) {
             fprintf(stderr, "%s\n", lua_tostring(sandbox->L, -1));
-            lua_close(sandbox->L);
             return -1;
         }
     } else {
@@ -177,7 +188,6 @@ int sandbox_run(sandbox_t *sandbox,
      * environment off the top of the stack. */
     if (lua_setfenv(sandbox->L, -2) != 1) {
         fprintf(stderr, "%s\n", lua_tostring(sandbox->L, -1));
-        lua_close(sandbox->L);
         return -1;
     }
     /* Evaluate the sandbox function, which is now at the top of the stack. */
@@ -186,7 +196,6 @@ int sandbox_run(sandbox_t *sandbox,
                 "error running %s: %s\n",
                 filename,
                 lua_tostring(sandbox->L, -1));
-        lua_close(sandbox->L);
         return -1;
     }
 

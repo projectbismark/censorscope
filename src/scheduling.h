@@ -1,13 +1,13 @@
 #ifndef CENSORSCOPE_SCHEDULING_H
 #define CENSORSCOPE_SCHEDULING_H
 
-#include <time.h>
-
 #include "lua.h"
+
+struct event_base;
 
 typedef struct {
     char *experiment;
-    lua_Integer interval;
+    lua_Integer interval_seconds;
     lua_Integer num_runs;
     struct event *ev;
     char *path;
@@ -20,11 +20,19 @@ typedef struct {
 
 /* Initialize an experiments schedule.
  *
- * The top of the provided Lua stack must contain a table of censorscope
- * settings. This usually comes from sandbox/main.lua.
+ * Arguments:
+ * - schedules is the structure to initialize.
+ * - base is a libevent2 event base, with which we will schedule our
+ *   experiments.
+ * - L is a Lua state. The stack must contain a table of censorscope settings at
+ *   table_index position. This usually comes from sandbox/main.lua.
+ * - table_index the stack position of censorscope settings. It can be either a
+ *   relative or absolute index.
+ * Returns: 0 on success, -1 on failure.
  *
  */
 int experiment_schedules_init(experiment_schedules_t *schedules,
+                              struct event_base *base,
                               lua_State *L,
                               int table_index);
 

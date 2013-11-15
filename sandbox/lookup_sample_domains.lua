@@ -1,4 +1,4 @@
-local domains = import("alexa_100")
+local domains = import("sample_domains")
 
 write_result("domain, ip, error")
 for _, domain in pairs(domains) do
