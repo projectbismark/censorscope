@@ -6,7 +6,7 @@ M.experiments = {
     num_runs = 1,
   },
   http = {
-    interval = 0,
+    interval_seconds = 0,
     num_runs = 1,
   },  
 }
