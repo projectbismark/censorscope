@@ -44,7 +44,6 @@ int l_http_get(lua_State *L) {
     CURLcode res;
 
     const char *url = luaL_checkstring(L, 1);
-    fprintf(stderr, "URL - %s\n", url);
 
     /* init the curl session */
     curl_handle = curl_easy_init();
