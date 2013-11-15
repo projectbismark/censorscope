@@ -7,6 +7,8 @@ for ip, port in pairs(ips) do
     log("Error connecting to " .. ip .. ": " .. err)
     write_result(string.format("%s:%d %s", ip, port, err))
   else
+    -- the result is a boolean, we need to convert it to a string
+    result = tostring(result)
     write_result(string.format("%s:%d %s", ip, port, result))
   end
 end

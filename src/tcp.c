@@ -40,7 +40,7 @@ int l_tcp_connect(lua_State *L) {
     }
 
     evutil_closesocket(sock);
-    lua_pushstring(L, "success");
+    lua_pushboolean(L, 1);
     lua_pushnil(L);
     return 2;
 }

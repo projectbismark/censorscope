@@ -63,7 +63,7 @@ end
 -- Arguments:
 -- - an IP address and port to connect to
 -- Returns:
--- - true if sucessful else false
+-- - true if sucessful else raise an error
 function api.tcp_connect(ip, port)
   return tcp_connect(ip, port)
 end
