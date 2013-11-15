@@ -3,6 +3,7 @@ SRC_DIR ?= src
 BUILD_DIR ?= build
 SRCS = \
 	$(SRC_DIR)/dns.c \
+	$(SRC_DIR)/http.c \
 	$(SRC_DIR)/censorscope.c \
 	$(SRC_DIR)/sandbox.c \
 	$(SRC_DIR)/register.c \
@@ -13,7 +14,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 EXE ?= censorscope
 CFLAGS += `pkg-config lua5.1 --cflags` -g -Wall -std=gnu99
-LDFLAGS += `pkg-config lua5.1 --libs` -lldns -levent
+LDFLAGS += `pkg-config lua5.1 --libs` -lldns -levent -lcurl -lssl -lcrypto -lz
 
 all: $(EXE)
 	echo $(BUILD_DIR)

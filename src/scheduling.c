@@ -47,7 +47,7 @@ static void run_experiment(evutil_socket_t fd, short what, void *arg) {
     }
 
     sandbox_t sandbox;
-    if (sandbox_init(&sandbox, schedule->experiment, 102400, 102400)) {
+    if (sandbox_init(&sandbox, schedule->experiment, 1024000, 102400)) {
         fprintf(stderr, "Error initializing sandbox for '%s'\n", schedule->path);
         return;
     }

@@ -62,6 +62,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    event_base_free(base);
     fprintf(stdout, "Ran successfully.\n");
 
     return 0;
