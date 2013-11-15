@@ -1,12 +1,12 @@
-local urls = import("tcp_connect_ips")
+local ips = import("tcp_connect_ips")
 
-for _, url in pairs(urls) do
-  log("Connecting to " .. url)
-  result, err = tcp_connect(url)
+for ip, port in pairs(ips) do
+  log(string.format("%s %s:%d", "Connecting to", ip, port))
+  result, err = tcp_connect(ip, port)
   if err then
-    log("Error connecting to " .. url .. ": " .. err)
-    write_result(url .. ",, " .. err)
+    log("Error connecting to " .. ip .. ": " .. err)
+    write_result(string.format("%s:%d %s", ip, port, err))
   else
-    write_result(url .. ", " .. result .. ",")
+    write_result(string.format("%s:%d %s", ip, port, result))
   end
 end

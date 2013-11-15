@@ -1,3 +1,3 @@
 return {
-  "http://www.google.com",
+  ["173.194.37.82"] = 80,
 }

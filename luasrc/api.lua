@@ -64,8 +64,8 @@ end
 -- - an IP address and port to connect to
 -- Returns:
 -- - true if sucessful else false
-function api.tcp_connect(url)
-  return tcp_connect(url)
+function api.tcp_connect(ip, port)
+  return tcp_connect(ip, port)
 end
 
 -- Write a result to the current results file.
