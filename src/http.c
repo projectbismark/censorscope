@@ -17,13 +17,7 @@ struct buffer {
 
 void init_buffer(struct buffer *data) {
     data->len = 0;
-    data->string = malloc(data->len+1);
-
-    if (data->string == NULL) {
-        fprintf(stderr, "malloc() failed\n");
-        exit(EXIT_FAILURE);
-    }
-    data->string[0] = '\0';
+    data->string = NULL;
 }
 
 static size_t write_data(void *string, size_t size, size_t nmemb, void *arg)
@@ -33,13 +27,13 @@ static size_t write_data(void *string, size_t size, size_t nmemb, void *arg)
     const size_t data_len = size*nmemb;
     const size_t new_len = data->len + data_len;
 
-    data->string = realloc(data->string, new_len+1);
+    data->string = realloc(data->string, new_len);
     if (data->string == NULL) {
         fprintf(stderr, "realloc failed\n");
+        return 0;
     }
 
     memcpy(data->string + data->len, string, data_len);
-    data->string[new_len] = '\0';
     data->len = new_len;
 
     return data_len;
@@ -86,9 +80,7 @@ int l_http_get(lua_State *L) {
         return 2;
     }
 
-    printf("%d\n", data.len);
-    printf("%s\n", data.string);
-    /* lua_pushstring(L, data.string); */
+    lua_pushlstring(L, data.string, data.len);
 
     /* cleanup */
     free(data.string);
