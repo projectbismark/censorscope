@@ -57,6 +57,17 @@ function api.http_get(url)
   return http_get(url)
 end
 
+-- Perform a TCP connect test.
+--
+--
+-- Arguments:
+-- - an IP address and port to connect to
+-- Returns:
+-- - true if sucessful else raise an error
+function api.tcp_connect(ip, port)
+  return tcp_connect(ip, port)
+end
+
 -- Write a result to the current results file.
 --
 -- Each run on an experiment has one result file. This function appends to it.
