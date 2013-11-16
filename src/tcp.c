@@ -23,7 +23,8 @@ int l_tcp_connect(lua_State *L) {
     memset(&sin, 0, sizeof(sin));
 
     sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = inet_addr(ip);
+    /* this breaks for ipv6, use inet_pton */
+    inet_aton(ip, &sin.sin_addr);
     sin.sin_port = htons(port);
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
