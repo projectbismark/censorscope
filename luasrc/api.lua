@@ -102,9 +102,30 @@ end
 -- http://lua-users.org/wiki/SandBoxes.
 api.ipairs = ipairs
 api.pairs = pairs
-api.string = {}
-api.string.format = string.format
+api.select = select
+api.tonumber = tonumber
 api.tostring = tostring
 api.type = type
+api.math = {}
+api.math.floor = math.floor
+api.math.huge = math.huge
+api.os = {}
+api.os.clock = os.clock
+api.os.difftime = os.difftime
+api.os.time = os.time
+api.string = {}
+api.string.byte = string.byte
+api.string.char = string.char
+api.string.find = string.find
+api.string.format = string.format
+api.string.gsub = string.gsub
+api.string.len = string.len
+api.string.match = string.match
+api.string.sub = string.sub
+api.table = {}
+api.table.concat = table.concat
+api.table.insert = table.insert
+api.table.remove = table.remove
+api.table.sort = table.sort
 
 return api
