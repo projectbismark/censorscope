@@ -1,4 +1,4 @@
-local urls = import("http_urls")
+local urls = require("http_urls")
 
 for _, url in pairs(urls) do
   log("Connecting to " .. url)

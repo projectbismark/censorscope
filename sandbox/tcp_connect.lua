@@ -1,4 +1,4 @@
-local ips = import("tcp_connect_ips")
+local ips = require("tcp_connect_ips")
 
 for ip, port in pairs(ips) do
   log(string.format("%s %s:%d", "Connecting to", ip, port))

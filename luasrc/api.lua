@@ -18,12 +18,17 @@ function api.log(...)
 end
 
 -- Load a module from the sandboxed module directory.
+--
+-- The global environment of the loaded module will be that of a new sandbox,
+-- not the requiring module. This is different from how requiring modules
+-- normally works in in Lua.
+--
 -- Arguments:
 -- - name is the name of the module to load, without a path or .lua extension.
 -- Returns:
--- - the result(s) of importing the module.
+-- - the result(s) of requiring the module.
 -- - an error, or nil if no error occurred.
-function api.import(name)
+function api.require(name)
   return run_in_sandbox(name)
 end
 
