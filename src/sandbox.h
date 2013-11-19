@@ -28,6 +28,7 @@ typedef struct {
  */
 int sandbox_init(sandbox_t *sandbox,
                  const char *name,
+                 const char *luasrc_dir,
                  size_t max_memory,
                  int max_instructions);
 

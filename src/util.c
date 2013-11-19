@@ -1,8 +1,34 @@
 #include "util.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+char *sprintf_malloc(const char *format, ...) {
+    va_list ap;
+
+    va_start(ap, format);
+    int count = vsnprintf(NULL, 0, format, ap);
+    char *output = malloc(count + 1);
+    if (!output) {
+        perror("malloc");
+        va_end(ap);
+        return NULL;
+    }
+    va_end(ap);
+
+    va_start(ap, format);
+    if (vsnprintf(output, count + 1, format, ap) != count) {
+        perror("vsnprintf");
+        free(output);
+        va_end(ap);
+        return NULL;
+    }
+    va_end(ap);
+
+    return output;
+}
 
 int is_valid_module_name(const char *name) {
     if (strchr(name, '/')) {
@@ -11,17 +37,12 @@ int is_valid_module_name(const char *name) {
     return 1;
 }
 
-char *module_filename(const char *module) {
+char *module_filename(const char *sandbox_dir, const char *module) {
     if (!is_valid_module_name(module)) {
         return NULL;
     }
-    const char *pattern = "sandbox/%s.lua";
-    const size_t filename_len = snprintf(NULL, 0, pattern, module);
-    char *filename = malloc(filename_len + 1);
+    char *filename = sprintf_malloc("%s/%s.lua", sandbox_dir, module);
     if (!filename) {
-        return NULL;
-    }
-    if (snprintf(filename, filename_len + 1, pattern, module) != filename_len) {
         return NULL;
     }
     return filename;

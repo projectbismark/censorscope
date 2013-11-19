@@ -3,6 +3,8 @@
 
 #include "lua.h"
 
+#include "options.h"
+
 struct event_base;
 
 typedef struct {
@@ -11,6 +13,7 @@ typedef struct {
     lua_Integer num_runs;
     struct event *ev;
     char *path;
+    censorscope_options_t *options;
 } experiment_schedule_t;
 
 typedef struct {
@@ -32,6 +35,7 @@ typedef struct {
  *
  */
 int experiment_schedules_init(experiment_schedules_t *schedules,
+                              censorscope_options_t *options,
                               struct event_base *base,
                               lua_State *L,
                               int table_index);

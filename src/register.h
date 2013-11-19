@@ -1,6 +1,7 @@
 #ifndef CENSORSCOPE_REGISTER_H
 #define CENSORSCOPE_REGISTER_H
 
+#include "options.h"
 #include "sandbox.h"
 
 /* Call this function to register a set of C functions with the provided
@@ -10,6 +11,6 @@
  * running any scripts in it.
  *
  */
-int register_functions(sandbox_t *sandbox);
+int register_functions(censorscope_options_t *options, sandbox_t *sandbox);
 
 #endif

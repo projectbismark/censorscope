@@ -13,6 +13,7 @@
 #include "lualib.h"
 
 #include "dns.h"
+#include "options.h"
 #include "register.h"
 #include "sandbox.h"
 #include "util.h"
@@ -47,30 +48,48 @@ static void run_experiment(evutil_socket_t fd, short what, void *arg) {
     }
 
     sandbox_t sandbox;
-    if (sandbox_init(&sandbox, schedule->experiment, 1024000, 102400)) {
+    if (sandbox_init(&sandbox,
+                     schedule->experiment,
+                     schedule->options->luasrc_dir,
+                     schedule->options->max_memory,
+                     schedule->options->max_instructions)) {
         fprintf(stderr, "Error initializing sandbox for '%s'\n", schedule->path);
         return;
     }
-    if (register_functions(&sandbox)) {
+    if (register_functions(schedule->options, &sandbox)) {
         fprintf(stderr, "Error registering sandbox functions\n");
         sandbox_destroy(&sandbox);
         return;
     }
-    if (sandbox_run(&sandbox, schedule->path, "luasrc/api.lua")) {
-        fprintf(stderr, "Error running '%s'\n", schedule->path);
+    char *filename = sprintf_malloc("%s/api.lua",
+                                    schedule->options->luasrc_dir);
+    if (!filename) {
+        fprintf(stderr,
+                "Error allocating filename for '%s'\n",
+                schedule->options->luasrc_dir);
         sandbox_destroy(&sandbox);
         return;
     }
+    if (sandbox_run(&sandbox, schedule->path, filename)) {
+        fprintf(stderr, "Error running '%s'\n", schedule->path);
+        free(filename);
+        sandbox_destroy(&sandbox);
+        return;
+    }
+    free(filename);
     if (sandbox_destroy(&sandbox)) {
         fprintf(stderr, "Error destorying sandbox for '%s'\n", schedule->path);
     }
 }
 
 static int experiment_schedule_init(experiment_schedule_t *schedule,
+                                    censorscope_options_t *options,
                                     struct event_base *base,
                                     const char *name,
                                     int interval_seconds,
                                     int num_runs) {
+    schedule->options = options;
+
     if (!is_valid_module_name(name)) {
         fprintf(stderr, "invalid experiment name\n");
         return -1;
@@ -84,7 +103,7 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
     schedule->interval_seconds = interval_seconds;
     schedule->num_runs = num_runs;
 
-    schedule->path = module_filename(name);
+    schedule->path = module_filename(options->sandbox_dir, name);
     if (!schedule->path) {
         perror("strdup");
         return -1;
@@ -131,6 +150,7 @@ static lua_Integer checkfield_integer(lua_State *L,
 }
 
 int experiment_schedules_init(experiment_schedules_t *schedules,
+                              censorscope_options_t *options,
                               struct event_base *base,
                               lua_State *L,
                               int table_index) {
@@ -149,6 +169,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
     lua_pushnil(L);  /* first key */
     while (lua_next(L, -2) != 0) {
         if (experiment_schedule_init(&schedules->schedules[i],
+                                     options,
                                      base,
                                      luaL_checkstring(L, -2),
                                      checkfield_integer(L, -1, "interval_seconds"),

@@ -8,11 +8,19 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#include "options.h"
 #include "sandbox.h"
 #include "scheduling.h"
 #include "transport.h"
+#include "util.h"
 
 int main(int argc, char **argv) {
+    censorscope_options_t options;
+    if (censorscope_options_init(&options, argc, argv)) {
+        fprintf(stderr, "Error parsing flags.\n");
+        return 1;
+    }
+
     struct event_base *base = event_base_new();
     if (!base) {
         fprintf(stderr, "Could not initialise libevent\n");
@@ -32,16 +40,26 @@ int main(int argc, char **argv) {
 
     /* Load the experiments configuration from sandbox/main.lua. */
     sandbox_t sandbox;
-    if (sandbox_init(&sandbox, "main", 102400, 1024)) {
+    if (sandbox_init(&sandbox,
+                     "main",
+                     options.luasrc_dir,
+                     options.max_memory,
+                     options.max_instructions)) {
         fprintf(stderr, "Error initializing sandbox.\n");
         return 1;
     }
-    if (sandbox_run(&sandbox, "sandbox/main.lua", NULL)) {
-        fprintf(stderr, "Error running code in sandbox.\n");
+    char *main_filename = sprintf_malloc("%s/main.lua", options.sandbox_dir);
+    if (!main_filename) {
         return 1;
     }
+    if (sandbox_run(&sandbox, main_filename, NULL)) {
+        fprintf(stderr, "Error running code in sandbox.\n");
+        free(main_filename);
+        return 1;
+    }
+    free(main_filename);
     experiment_schedules_t schedules;
-    if (experiment_schedules_init(&schedules, base, sandbox.L, 1)) {
+    if (experiment_schedules_init(&schedules, &options, base, sandbox.L, 1)) {
         fprintf(stderr, "Error initializing experiments schedule.\n");
         return 1;
     }
@@ -62,8 +80,16 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    if (experiment_schedules_destroy(&schedules)) {
+        fprintf(stderr, "Error destroying schedules.\n");
+        return 1;
+    }
     event_base_free(base);
-    fprintf(stdout, "Ran successfully.\n");
+    if (censorscope_options_destroy(&options)) {
+        fprintf(stderr, "Error destroying options.\n");
+        return 1;
+    }
 
+    fprintf(stdout, "Ran successfully.\n");
     return 0;
 }

@@ -7,6 +7,8 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#include "util.h"
+
 #define BYTECODE_MAGIC_NUMBER 27
 
 /* Copied from lauxlib.c */
@@ -124,16 +126,23 @@ static int prepend_package_path(lua_State *L, const char* new_entry) {
 
 int sandbox_init(sandbox_t *sandbox,
                  const char *name,
+                 const char *luasrc_dir,
                  size_t max_memory,
                  int max_instructions) {
-    sandbox->available_memory = max_memory;
-    sandbox->L = lua_newstate(l_alloc_restricted, &sandbox->available_memory);
+    if (max_memory > 0) {
+        sandbox->available_memory = max_memory;
+        sandbox->L = lua_newstate(l_alloc_restricted, &sandbox->available_memory);
+    } else {
+        sandbox->L = luaL_newstate();
+    }
     if (!sandbox->L) {
         fprintf(stderr, "Error calling luaL_newstate\n");
         return -1;
     }
     lua_atpanic(sandbox->L, &panic);
-    lua_sethook(sandbox->L, exit_hook, LUA_MASKCOUNT, max_instructions);
+    if (max_instructions > 0) {
+        lua_sethook(sandbox->L, exit_hook, LUA_MASKCOUNT, max_instructions);
+    }
     luaL_openlibs(sandbox->L);
     lua_pushstring(sandbox->L, name);
     lua_setglobal(sandbox->L, "SANDBOX_NAME");
@@ -142,10 +151,16 @@ int sandbox_init(sandbox_t *sandbox,
      * environment can easily reference files in the same directory. For
      * example, we often use luasrc/api.lua for environment, and it should be
      * able to import files from that directory. */
-    if (prepend_package_path(sandbox->L, "luasrc/?.lua")) {
-        fprintf(stderr, "Error setting packages.path\n");
+    char *new_pattern = sprintf_malloc("%s/?.lua", luasrc_dir);
+    if (!new_pattern) {
         return -1;
     }
+    if (prepend_package_path(sandbox->L, new_pattern)) {
+        fprintf(stderr, "Error setting packages.path\n");
+        free(new_pattern);
+        return -1;
+    }
+    free(new_pattern);
     return 0;
 }
 
