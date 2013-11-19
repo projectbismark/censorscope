@@ -16,6 +16,9 @@ int run_in_sandbox(lua_State *L) {
     sandbox_t *sandbox = lua_touserdata(L, lua_upvalueindex(1));
     const char *module = luaL_checkstring(L, -1);
     char *filename = module_filename(module);
+    if (!filename) {
+        return luaL_error(L, "invalid module name");
+    }
 
     if (sandbox_run(sandbox, filename, "luasrc/api.lua")) {
         return luaL_error(L, "error running in sandbox");
