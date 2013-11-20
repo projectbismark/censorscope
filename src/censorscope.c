@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Starting now.\n");
 
     transport_t transport;
-    if (transport_init(&transport, "rsync")) {
+    if (transport_init(&transport, &options, "rsync")) {
         fprintf(stderr, "Error initializing transport\n");
         return 1;
     }

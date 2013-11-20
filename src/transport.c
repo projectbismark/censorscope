@@ -8,14 +8,18 @@
 
 #include "util.h"
 
-int transport_init(transport_t *transport, const char *module) {
+int transport_init(transport_t *transport,
+                   censorscope_options_t *options,
+                   const char *module) {
     transport->L = luaL_newstate();
     if (!transport->L) {
         return -1;
     }
     luaL_openlibs(transport->L);
 
-    char *filename = sprintf_malloc("transports/%s.lua", module);
+    char *filename = sprintf_malloc("%s/transports/%s.lua",
+                                    options->luasrc_dir,
+                                    module);
     if (!filename) {
         return -1;
     }
