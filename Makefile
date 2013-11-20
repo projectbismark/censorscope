@@ -15,8 +15,10 @@ SRCS = \
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 EXE ?= censorscope
-CFLAGS += `pkg-config lua5.1 --cflags` -g -Wall -std=gnu99
-LDFLAGS += `pkg-config lua5.1 --libs` -lldns -levent -lcurl -lssl -lcrypto -lz
+LUA_CFLAGS ?= `pkg-config lua5.1 --cflags`
+CFLAGS += $(LUA_CFLAGS) -g -Wall -std=gnu99
+LUA_LIBS ?= `pkg-config lua5.1 --libs`
+LDFLAGS += $(LUA_LIBS) -lldns -levent -lcurl -lssl -lcrypto -lz
 
 all: $(EXE)
 	echo $(BUILD_DIR)
