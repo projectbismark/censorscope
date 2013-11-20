@@ -17,6 +17,18 @@ OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 EXE ?= censorscope
 LUA_CFLAGS ?= `pkg-config lua5.1 --cflags`
 CFLAGS += $(LUA_CFLAGS) -g -Wall -std=gnu99
+ifdef DEFAULT_SANDBOX_DIR
+CFLAGS += -DDEFAULT_SANDBOX_DIR="\"$(DEFAULT_SANDBOX_DIR)\""
+endif
+ifdef DEFAULT_LUASRC_DIR
+CFLAGS += -DDEFAULT_LUASRC_DIR="\"$(DEFAULT_LUASRC_DIR)\""
+endif
+ifdef DEFAULT_MAX_MEMORY
+CFLAGS += -DDEFAULT_MAX_MEMORY="$(DEFAULT_MAX_MEMORY)"
+endif
+ifdef DEFAULT_MAX_INSTRUCTIONS
+CFLAGS += -DDEFAULT_MAX_INSTRUCTIONS="$(DEFAULT_MAX_INSTRUCTIONS)"
+endif
 LUA_LIBS ?= `pkg-config lua5.1 --libs`
 LDFLAGS += $(LUA_LIBS) -lldns -levent -lcurl -lssl -lcrypto -lz
 

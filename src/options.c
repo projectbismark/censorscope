@@ -7,33 +7,55 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifndef DEFAULT_SANDBOX_DIR
+#define DEFAULT_SANDBOX_DIR "sandbox"
+#endif
+
+#ifndef DEFAULT_LUASRC_DIR
+#define DEFAULT_LUASRC_DIR "luasrc"
+#endif
+
+#ifndef DEFAULT_MAX_MEMORY
+#define DEFAULT_MAX_MEMORY 0
+#endif
+
+#ifndef DEFAULT_MAX_INSTRUCTIONS
+#define DEFAULT_MAX_INSTRUCTIONS 0
+#endif
+
 static void print_usage(const char *program) {
     const char *usage_string =
         "Usage: %s [options]\n"
         "  -h --help\n"
-        "  -i --max-instructions <instructions> (default: 0)\n"
-        "  -l --luasrc-dir <path> (default: \"luasrc\")\n"
-        "  -m --max-memory <bytes> (default: 0)\n"
-        "  -s --sandbox-dir <path> (default: \"sandbox\")\n";
-    fprintf(stderr, usage_string, program);
+        "  -i --max-instructions <instructions> (default: %ld)\n"
+        "  -l --luasrc-dir <path> (default: \"%s\")\n"
+        "  -m --max-memory <bytes> (default: %ld)\n"
+        "  -s --sandbox-dir <path> (default: \"%s\")\n";
+    fprintf(stderr,
+            usage_string,
+            program,
+            DEFAULT_MAX_INSTRUCTIONS,
+            DEFAULT_LUASRC_DIR,
+            DEFAULT_MAX_MEMORY,
+            DEFAULT_SANDBOX_DIR);
 }
 
 int censorscope_options_init(censorscope_options_t *options,
                              int argc,
                              char **argv) {
-    options->sandbox_dir = strdup("sandbox");
+    options->sandbox_dir = strdup(DEFAULT_SANDBOX_DIR);
     if (!options->sandbox_dir) {
         perror("stdrup");
         return -1;
     }
-    options->luasrc_dir = strdup("luasrc");
+    options->luasrc_dir = strdup(DEFAULT_LUASRC_DIR);
     if (!options->luasrc_dir) {
         free(options->sandbox_dir);
         perror("stdrup");
         return -1;
     }
-    options->max_memory = 0;
-    options->max_instructions = 0;
+    options->max_memory = DEFAULT_MAX_MEMORY;
+    options->max_instructions = DEFAULT_MAX_INSTRUCTIONS;
 
     const char *short_options = "hi:l:m:s:";
     const struct option long_options[] = {
