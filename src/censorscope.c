@@ -30,12 +30,16 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Starting now.\n");
 
     transport_t transport;
-    if (transport_init(&transport, &options, "rsync")) {
+    if (transport_init(&transport, &options, options.download_transport)) {
         fprintf(stderr, "Error initializing transport\n");
         return 1;
     }
     if (transport_download(&transport)) {
         /* return */
+    }
+    if (transport_destroy(&transport)) {
+        fprintf(stderr, "Error destroying transport\n");
+        return 1;
     }
 
     /* Load the experiments configuration from sandbox/main.lua. */
@@ -71,10 +75,13 @@ int main(int argc, char **argv) {
     /* start the event loop */
     event_base_dispatch(base);
 
+    if (transport_init(&transport, &options, options.upload_transport)) {
+        fprintf(stderr, "Error initializing transport\n");
+        return 1;
+    }
     if (transport_upload(&transport)) {
       /* return */
     }
-
     if (transport_destroy(&transport)) {
         fprintf(stderr, "Error destroying transport\n");
         return 1;
