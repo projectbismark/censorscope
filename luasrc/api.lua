@@ -85,7 +85,7 @@ end
 function api.write_result(output)
   -- TODO: Check if results/ is present, if not
   --       create it
-  local filename = string.format("results/%s-%s.txt", SANDBOX_NAME, run_id)
+  local filename = string.format("%s/%s-%s.txt", CENSORSCOPE_OPTIONS.results_dir, SANDBOX_NAME, run_id)
   utils.pprint("writing results to %s", filename)
 
   local handle, err = io.open(filename, "a")
