@@ -7,6 +7,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "lua.h"
+#include "lualib.h"
+
 #ifndef DEFAULT_SANDBOX_DIR
 #define DEFAULT_SANDBOX_DIR "sandbox"
 #endif
@@ -214,6 +217,25 @@ int censorscope_options_init(censorscope_options_t *options,
         }
     }
 
+    return 0;
+}
+
+int censorscope_options_lua(const censorscope_options_t *options,
+                            lua_State *L) {
+    lua_pushstring(L, options->sandbox_dir);
+    lua_setfield(L, -2, "sandbox_dir");
+    lua_pushstring(L, options->luasrc_dir);
+    lua_setfield(L, -2, "luasrc_dir");
+    lua_pushstring(L, options->results_dir);
+    lua_setfield(L, -2, "results_dir");
+    lua_pushnumber(L, options->max_memory);
+    lua_setfield(L, -2, "max_memory");
+    lua_pushnumber(L, options->max_instructions);
+    lua_setfield(L, -2, "max_instructions");
+    lua_pushstring(L, options->download_transport);
+    lua_setfield(L, -2, "download_transport");
+    lua_pushstring(L, options->upload_transport);
+    lua_setfield(L, -2, "upload_transport");
     return 0;
 }
 

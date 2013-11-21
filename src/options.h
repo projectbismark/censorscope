@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 
+#include "lua.h"
+
 typedef struct {
     char *sandbox_dir;
     char *luasrc_dir;
@@ -25,6 +27,8 @@ typedef struct {
 int censorscope_options_init(censorscope_options_t *options,
                              int argc,
                              char **argv);
+
+int censorscope_options_lua(const censorscope_options_t *options, lua_State *L);
 
 int censorscope_options_destroy(censorscope_options_t *options);
 

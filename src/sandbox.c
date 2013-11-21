@@ -126,11 +126,9 @@ static int prepend_package_path(lua_State *L, const char* new_entry) {
 
 int sandbox_init(sandbox_t *sandbox,
                  const char *name,
-                 const char *luasrc_dir,
-                 size_t max_memory,
-                 int max_instructions) {
-    if (max_memory > 0) {
-        sandbox->available_memory = max_memory;
+                 const censorscope_options_t *options) {
+    if (options->max_memory > 0) {
+        sandbox->available_memory = options->max_memory;
         sandbox->L = lua_newstate(l_alloc_restricted, &sandbox->available_memory);
     } else {
         sandbox->L = luaL_newstate();
@@ -140,18 +138,24 @@ int sandbox_init(sandbox_t *sandbox,
         return -1;
     }
     lua_atpanic(sandbox->L, &panic);
-    if (max_instructions > 0) {
-        lua_sethook(sandbox->L, exit_hook, LUA_MASKCOUNT, max_instructions);
+    if (options->max_instructions > 0) {
+        lua_sethook(sandbox->L, exit_hook, LUA_MASKCOUNT, options->max_instructions);
     }
     luaL_openlibs(sandbox->L);
     lua_pushstring(sandbox->L, name);
     lua_setglobal(sandbox->L, "SANDBOX_NAME");
+    lua_newtable(sandbox->L);
+    if (censorscope_options_lua(options, sandbox->L)) {
+        fprintf(stderr, "Error creating table of censorscope options.\n");
+        return -1;
+    }
+    lua_setglobal(sandbox->L, "CENSORSCOPE_OPTIONS");
 
     /* Add luasrc/ to the path so that the script we evaluate to obtain the
      * environment can easily reference files in the same directory. For
      * example, we often use luasrc/api.lua for environment, and it should be
      * able to import files from that directory. */
-    char *new_pattern = sprintf_malloc("%s/?.lua", luasrc_dir);
+    char *new_pattern = sprintf_malloc("%s/?.lua", options->luasrc_dir);
     if (!new_pattern) {
         return -1;
     }

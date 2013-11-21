@@ -44,11 +44,7 @@ int main(int argc, char **argv) {
 
     /* Load the experiments configuration from sandbox/main.lua. */
     sandbox_t sandbox;
-    if (sandbox_init(&sandbox,
-                     "main",
-                     options.luasrc_dir,
-                     options.max_memory,
-                     options.max_instructions)) {
+    if (sandbox_init(&sandbox, "main", &options)) {
         fprintf(stderr, "Error initializing sandbox.\n");
         return 1;
     }

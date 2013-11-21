@@ -3,6 +3,8 @@
 
 #include "lua.h"
 
+#include "options.h"
+
 typedef struct {
     lua_State *L;
     size_t available_memory;
@@ -14,23 +16,14 @@ typedef struct {
  * Arguments:
  * - name is a name for the sandbox, which will be exposed when evaluating the
  *   environment.
- * - max_memory is the total amount of memory available to the interpreter for
- *   evaluating the environment and running the sandboxed code.
- * - max_instructions is the total number of instructions available to evaluate
- *   both the environment and the script itself. Note that is the count of Lua
- *   interpreter instructions, not CPU instructions. If a script can call out to
- *   C functions, this instructions limitation will not gauarantee that the
- *   script completes within a fixed amount of time, especially if sleeping or
- *   waiting on I/O is possible. In that case you should enforce operating
- *   system resource limits.
+ * - options is the set of censorscope options, which will be exposed when
+ *   evaluating the environment.
  * Returns: 0 on success, -1 on failure.
  *
  */
 int sandbox_init(sandbox_t *sandbox,
                  const char *name,
-                 const char *luasrc_dir,
-                 size_t max_memory,
-                 int max_instructions);
+                 const censorscope_options_t *options);
 
 int sandbox_destroy(sandbox_t *sandbox);
 

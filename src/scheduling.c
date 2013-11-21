@@ -48,11 +48,7 @@ static void run_experiment(evutil_socket_t fd, short what, void *arg) {
     }
 
     sandbox_t sandbox;
-    if (sandbox_init(&sandbox,
-                     schedule->experiment,
-                     schedule->options->luasrc_dir,
-                     schedule->options->max_memory,
-                     schedule->options->max_instructions)) {
+    if (sandbox_init(&sandbox, schedule->experiment, schedule->options)) {
         fprintf(stderr, "Error initializing sandbox for '%s'\n", schedule->path);
         return;
     }
