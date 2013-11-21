@@ -9,7 +9,7 @@
 #include "util.h"
 
 int transport_init(transport_t *transport,
-                   censorscope_options_t *options,
+                   const censorscope_options_t *options,
                    const char *module) {
     transport->L = luaL_newstate();
     if (!transport->L) {

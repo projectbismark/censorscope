@@ -10,7 +10,7 @@ typedef struct {
 } transport_t;
 
 int transport_init(transport_t *transport,
-                   censorscope_options_t *options,
+                   const censorscope_options_t *options,
                    const char *module);
 
 int transport_destroy(transport_t *transport);
