@@ -7,6 +7,7 @@
 
 typedef struct {
     lua_State *L;
+    const censorscope_options_t *options;
 } transport_t;
 
 int transport_init(transport_t *transport,

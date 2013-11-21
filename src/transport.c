@@ -32,13 +32,16 @@ int transport_init(transport_t *transport,
         return -1;
     }
 
+    transport->options = options;
+
     free(filename);
     return 0;
 }
 
 int transport_download(transport_t *transport) {
     lua_getfield(transport->L, -1, "sync_sandbox");
-    if (lua_pcall(transport->L, 0, 0, 0)) {
+    lua_pushstring(transport->L, transport->options->sandbox_dir);
+    if (lua_pcall(transport->L, 1, 0, 0)) {
         fprintf(stderr,
                 "Error downloading files: %s\n",
                 luaL_checkstring(transport->L, -1));
@@ -50,7 +53,8 @@ int transport_download(transport_t *transport) {
 
 int transport_upload(transport_t *transport) {
     lua_getfield(transport->L, -1, "upload_results");
-    if (lua_pcall(transport->L, 0, 0, 0)) {
+    lua_pushstring(transport->L, transport->options->results_dir);
+    if (lua_pcall(transport->L, 1, 0, 0)) {
         fprintf(stderr,
                 "Error uploading results: %s\n",
                 luaL_checkstring(transport->L, -1));
