@@ -83,7 +83,9 @@ int l_dns_lookup(lua_State *L) {
         ldns_rdf *a_record = ldns_rr_a_address(result);
         char *ip_address = ldns_rdf2str(a_record);
         lua_pushstring(L, ip_address);
+        free(ip_address);
     }
+    ldns_rr_list_deep_free(results);
     ldns_pkt_free(pkt);
     ldns_resolver_deep_free(resolver);
     lua_pushnil(L);
