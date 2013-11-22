@@ -22,6 +22,7 @@ typedef struct {
     long max_instructions;
     char *download_transport;
     char *upload_transport;
+    int synchronous;
 } censorscope_options_t;
 
 int censorscope_options_init(censorscope_options_t *options,

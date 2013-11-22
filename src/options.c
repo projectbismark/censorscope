@@ -50,7 +50,8 @@ static void print_usage(const char *program) {
         "  -m --max-memory <bytes> (default: %ld)\n"
         "  -r --results-dir <path> (default: \"%s\")\n"
         "  -s --sandbox-dir <path> (default: \"%s\")\n"
-        "  -u --upload-transport <transport> (default: \"%s\")\n";
+        "  -u --upload-transport <transport> (default: \"%s\")\n"
+        "  -y --synchronous\n";
     fprintf(stderr,
             usage_string,
             program,
@@ -103,8 +104,9 @@ int censorscope_options_init(censorscope_options_t *options,
         log_error("strdup error: %m");
         return -1;
     }
+    options->synchronous = 0;
 
-    const char *short_options = "d:hi:l:m:r:s:u:";
+    const char *short_options = "d:hi:l:m:r:s:u:y";
     const struct option long_options[] = {
         {"download-transport", 1, NULL, 'd'},
         {"help", 0, NULL, 'h'},
@@ -114,6 +116,7 @@ int censorscope_options_init(censorscope_options_t *options,
         {"results-dir", 1, NULL, 'r'},
         {"sandbox-dir", 1, NULL, 's'},
         {"upload-transport", 1, NULL, 'u'},
+        {"synchronous", 0, NULL, 'y'},
         {0, 0, 0, 0}
     };
     for (;;) {
@@ -215,6 +218,10 @@ int censorscope_options_init(censorscope_options_t *options,
                 censorscope_options_destroy(options);
                 return -1;
             }
+            break;
+
+        case 'y':
+            options->synchronous = 1;
             break;
 
         default:
