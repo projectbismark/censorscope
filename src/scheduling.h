@@ -3,17 +3,17 @@
 
 #include "lua.h"
 
+#include "experiment.h"
 #include "options.h"
 
 struct event_base;
 
 typedef struct {
-    char *experiment;
     lua_Integer interval_seconds;
     lua_Integer num_runs;
     struct event *ev;
-    char *path;
-    censorscope_options_t *options;
+
+    experiment_t experiment;
 } experiment_schedule_t;
 
 typedef struct {

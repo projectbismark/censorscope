@@ -4,6 +4,7 @@ BUILD_DIR ?= build
 SRCS = \
 	$(SRC_DIR)/censorscope.c \
 	$(SRC_DIR)/dns.c \
+	$(SRC_DIR)/experiment.c \
 	$(SRC_DIR)/http.c \
 	$(SRC_DIR)/logging.c \
 	$(SRC_DIR)/options.c \
