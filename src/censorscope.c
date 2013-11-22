@@ -8,6 +8,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#include "logging.h"
 #include "options.h"
 #include "sandbox.h"
 #include "scheduling.h"
@@ -15,56 +16,57 @@
 #include "util.h"
 
 int main(int argc, char **argv) {
+    logging_init();
+
     censorscope_options_t options;
     if (censorscope_options_init(&options, argc, argv)) {
-        fprintf(stderr, "Error parsing flags.\n");
+        log_error("error parsing flags");
         return 1;
     }
 
     struct event_base *base = event_base_new();
     if (!base) {
-        fprintf(stderr, "Could not initialise libevent\n");
+        log_error("could not initialise libevent");
         return 1;
     }
-
-    fprintf(stderr, "Starting now.\n");
 
     transport_t transport;
     if (transport_init(&transport, &options, options.download_transport)) {
-        fprintf(stderr, "Error initializing transport\n");
+        log_error("error initializing transport");
         return 1;
     }
     if (transport_download(&transport)) {
-        /* return */
+        log_error("error synchronizing sandbox");
     }
     if (transport_destroy(&transport)) {
-        fprintf(stderr, "Error destroying transport\n");
+        log_error("error destroying transport");
         return 1;
     }
 
     /* Load the experiments configuration from sandbox/main.lua. */
     sandbox_t sandbox;
     if (sandbox_init(&sandbox, "main", &options)) {
-        fprintf(stderr, "Error initializing sandbox.\n");
+        log_error("error initializing sandbox");
         return 1;
     }
     char *main_filename = sprintf_malloc("%s/main.lua", options.sandbox_dir);
     if (!main_filename) {
+        log_error("error allocating main_filename");
         return 1;
     }
     if (sandbox_run(&sandbox, main_filename, NULL)) {
-        fprintf(stderr, "Error running code in sandbox.\n");
+        log_error("error running code in sandbox");
         free(main_filename);
         return 1;
     }
     free(main_filename);
     experiment_schedules_t schedules;
     if (experiment_schedules_init(&schedules, &options, base, sandbox.L, 1)) {
-        fprintf(stderr, "Error initializing experiments schedule.\n");
+        log_error("error initializing experiments schedule");
         return 1;
     }
     if (sandbox_destroy(&sandbox)) {
-        fprintf(stderr, "Error destroying sandbox.\n");
+        log_error("error destroying sandbox");
         return 1;
     }
 
@@ -72,27 +74,26 @@ int main(int argc, char **argv) {
     event_base_dispatch(base);
 
     if (transport_init(&transport, &options, options.upload_transport)) {
-        fprintf(stderr, "Error initializing transport\n");
+        log_error("error initializing transport");
         return 1;
     }
     if (transport_upload(&transport)) {
-      /* return */
+        log_error("error uploading results");
     }
     if (transport_destroy(&transport)) {
-        fprintf(stderr, "Error destroying transport\n");
+        log_error("error destroying transport");
         return 1;
     }
 
     if (experiment_schedules_destroy(&schedules)) {
-        fprintf(stderr, "Error destroying schedules.\n");
+        log_error("error destroying schedules");
         return 1;
     }
     event_base_free(base);
     if (censorscope_options_destroy(&options)) {
-        fprintf(stderr, "Error destroying options.\n");
+        log_error("error destroying options");
         return 1;
     }
 
-    fprintf(stdout, "Ran successfully.\n");
     return 0;
 }

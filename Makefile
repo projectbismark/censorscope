@@ -5,6 +5,7 @@ SRCS = \
 	$(SRC_DIR)/censorscope.c \
 	$(SRC_DIR)/dns.c \
 	$(SRC_DIR)/http.c \
+	$(SRC_DIR)/logging.c \
 	$(SRC_DIR)/options.c \
 	$(SRC_DIR)/register.c \
 	$(SRC_DIR)/sandbox.c \

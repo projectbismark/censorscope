@@ -10,6 +10,8 @@
 #include "lua.h"
 #include "lualib.h"
 
+#include "logging.h"
+
 #ifndef DEFAULT_SANDBOX_DIR
 #define DEFAULT_SANDBOX_DIR "sandbox"
 #endif
@@ -66,20 +68,20 @@ int censorscope_options_init(censorscope_options_t *options,
                              char **argv) {
     options->sandbox_dir = strdup(DEFAULT_SANDBOX_DIR);
     if (!options->sandbox_dir) {
-        perror("stdrup");
+        log_error("strdup error: %m");
         return -1;
     }
     options->luasrc_dir = strdup(DEFAULT_LUASRC_DIR);
     if (!options->luasrc_dir) {
         free(options->sandbox_dir);
-        perror("stdrup");
+        log_error("strdup error: %m");
         return -1;
     }
     options->results_dir = strdup(DEFAULT_RESULTS_DIR);
     if (!options->results_dir) {
         free(options->luasrc_dir);
         free(options->sandbox_dir);
-        perror("stdrup");
+        log_error("strdup error: %m");
         return -1;
     }
     options->max_memory = DEFAULT_MAX_MEMORY;
@@ -89,7 +91,7 @@ int censorscope_options_init(censorscope_options_t *options,
         free(options->results_dir);
         free(options->luasrc_dir);
         free(options->sandbox_dir);
-        perror("stdrup");
+        log_error("strdup error: %m");
         return -1;
     }
     options->upload_transport = strdup(DEFAULT_UPLOAD_TRANSPORT);
@@ -98,7 +100,7 @@ int censorscope_options_init(censorscope_options_t *options,
         free(options->results_dir);
         free(options->luasrc_dir);
         free(options->sandbox_dir);
-        perror("stdrup");
+        log_error("strdup error: %m");
         return -1;
     }
 
@@ -122,8 +124,11 @@ int censorscope_options_init(censorscope_options_t *options,
                             long_options,
                             &option_index);
         if (c == -1) {
+            log_debug("done parsing options");
             break;
         }
+
+        log_debug("got option %c", c);
 
         char *first_invalid;
         switch (c) {
@@ -131,7 +136,7 @@ int censorscope_options_init(censorscope_options_t *options,
             free(options->download_transport);
             options->download_transport = strdup(optarg);
             if (!options->download_transport) {
-                perror("strdup");
+                log_error("strdup error: %m");
                 censorscope_options_destroy(options);
                 return -1;
             }
@@ -146,12 +151,13 @@ int censorscope_options_init(censorscope_options_t *options,
             errno = 0;
             options->max_instructions = strtol(optarg, &first_invalid, 10);
             if (errno) {
-                perror("strtol");
+                log_error("strtol error: %m");
                 censorscope_options_destroy(options);
                 return -1;
             }
             if (first_invalid[0] != '\0') {
-                fprintf(stderr, "Invalid instruction count.\n");
+                log_error("invalid instruction count: not a number");
+                censorscope_options_destroy(options);
                 return -1;
             }
             break;
@@ -160,7 +166,7 @@ int censorscope_options_init(censorscope_options_t *options,
             free(options->luasrc_dir);
             options->luasrc_dir = strdup(optarg);
             if (!options->luasrc_dir) {
-                perror("strdup");
+                log_error("strdup error: %m");
                 censorscope_options_destroy(options);
                 return -1;
             }
@@ -170,12 +176,12 @@ int censorscope_options_init(censorscope_options_t *options,
             errno = 0;
             options->max_memory = strtol(optarg, &first_invalid, 10);
             if (errno) {
-                perror("strtol");
+                log_error("strtol error: %m");
                 censorscope_options_destroy(options);
                 return -1;
             }
             if (first_invalid[0] != '\0') {
-                fprintf(stderr, "Invalid max memory.\n");
+                log_error("invalid max memory: not a number");
                 censorscope_options_destroy(options);
                 return -1;
             }
@@ -185,7 +191,7 @@ int censorscope_options_init(censorscope_options_t *options,
             free(options->results_dir);
             options->results_dir = strdup(optarg);
             if (!options->results_dir) {
-                perror("strdup");
+                log_error("strdup error: %m");
                 censorscope_options_destroy(options);
                 return -1;
             }
@@ -195,7 +201,7 @@ int censorscope_options_init(censorscope_options_t *options,
             free(options->sandbox_dir);
             options->sandbox_dir = strdup(optarg);
             if (!options->sandbox_dir) {
-                perror("strdup");
+                log_error("strdup error: %m");
                 censorscope_options_destroy(options);
                 return -1;
             }
@@ -205,14 +211,16 @@ int censorscope_options_init(censorscope_options_t *options,
             free(options->upload_transport);
             options->upload_transport = strdup(optarg);
             if (!options->upload_transport) {
-                perror("strdup");
+                log_error("strdup error: %m");
                 censorscope_options_destroy(options);
                 return -1;
             }
             break;
 
         default:
+            log_error("invalid option");
             print_usage(argv[0]);
+            censorscope_options_destroy(options);
             exit(EXIT_FAILURE);
         }
     }

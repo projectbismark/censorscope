@@ -7,6 +7,7 @@
 #include "lualib.h"
 
 #include "dns.h"
+#include "logging.h"
 #include "tcp.h"
 #include "http.h"
 #include "options.h"
@@ -37,10 +38,32 @@ int run_in_sandbox(lua_State *L) {
     return 1;
 }
 
+int l_log_error(lua_State *L) {
+    const char *message = luaL_checkstring(L, -1);
+    log_error("%s", message);
+    return 0;
+}
+
+int l_log_info(lua_State *L) {
+    const char *message = luaL_checkstring(L, -1);
+    log_info("%s", message);
+    return 0;
+}
+
+int l_log_debug(lua_State *L) {
+    const char *message = luaL_checkstring(L, -1);
+    log_debug("%s", message);
+    return 0;
+}
+
 int register_functions(censorscope_options_t *options, sandbox_t *sandbox) {
     lua_register(sandbox->L, "dns_lookup", l_dns_lookup);
     lua_register(sandbox->L, "http_get", l_http_get);
     lua_register(sandbox->L, "tcp_connect", l_tcp_connect);
+
+    lua_register(sandbox->L, "log_error", l_log_error);
+    lua_register(sandbox->L, "log_info", l_log_info);
+    lua_register(sandbox->L, "log_debug", l_log_debug);
 
     lua_pushlightuserdata(sandbox->L, options);
     lua_pushlightuserdata(sandbox->L, sandbox);

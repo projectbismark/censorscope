@@ -13,6 +13,7 @@
 #include "lualib.h"
 
 #include "dns.h"
+#include "logging.h"
 #include "options.h"
 #include "register.h"
 #include "sandbox.h"
@@ -49,32 +50,31 @@ static void run_experiment(evutil_socket_t fd, short what, void *arg) {
 
     sandbox_t sandbox;
     if (sandbox_init(&sandbox, schedule->experiment, schedule->options)) {
-        fprintf(stderr, "Error initializing sandbox for '%s'\n", schedule->path);
+        log_error("error initializing sandbox for '%s'", schedule->path);
         return;
     }
     if (register_functions(schedule->options, &sandbox)) {
-        fprintf(stderr, "Error registering sandbox functions\n");
+        log_error("error registering sandbox functions");
         sandbox_destroy(&sandbox);
         return;
     }
     char *filename = sprintf_malloc("%s/api.lua",
                                     schedule->options->luasrc_dir);
     if (!filename) {
-        fprintf(stderr,
-                "Error allocating filename for '%s'\n",
-                schedule->options->luasrc_dir);
+        log_error("error allocating filename for '%s'",
+                  schedule->options->luasrc_dir);
         sandbox_destroy(&sandbox);
         return;
     }
     if (sandbox_run(&sandbox, schedule->path, filename)) {
-        fprintf(stderr, "Error running '%s'\n", schedule->path);
+        log_error("error running '%s'", schedule->path);
         free(filename);
         sandbox_destroy(&sandbox);
         return;
     }
     free(filename);
     if (sandbox_destroy(&sandbox)) {
-        fprintf(stderr, "Error destorying sandbox for '%s'\n", schedule->path);
+        log_error("error destorying sandbox for '%s'", schedule->path);
     }
 }
 
@@ -87,13 +87,13 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
     schedule->options = options;
 
     if (!is_valid_module_name(name)) {
-        fprintf(stderr, "invalid experiment name\n");
+        log_error("invalid experiment name");
         return -1;
     }
 
     schedule->experiment = strdup(name);
     if (!schedule->experiment) {
-        perror("strdup");
+        log_error("strdup error: %m");
         return -1;
     }
     schedule->interval_seconds = interval_seconds;
@@ -101,7 +101,7 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
 
     schedule->path = module_filename(options->sandbox_dir, name);
     if (!schedule->path) {
-        perror("strdup");
+        log_error("strdup error: %m");
         return -1;
     }
 
@@ -112,7 +112,7 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
                                  run_experiment,
                                  schedule);
         if (!schedule->ev) {
-            fprintf(stderr, "Error calling event_new\n");
+            log_error("error calling event_new");
             return -1;
         }
 
@@ -120,18 +120,17 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
         next_run.tv_sec = interval_seconds;
         next_run.tv_usec = 0;
         if (event_add(schedule->ev, &next_run)) {
-            fprintf(stderr, "Error adding event.\n");
+            log_error("error adding event.");
             return -1;
         }
     } else {
         schedule->ev = NULL;
     }
 
-    fprintf(stdout,
-            "Loaded experiment '%s' with interval %ld to run %ld times.\n",
-            schedule->experiment,
-            schedule->interval_seconds,
-            schedule->num_runs);
+    log_info("loaded experiment '%s' with interval %ld to run %ld times",
+             schedule->experiment,
+             schedule->interval_seconds,
+             schedule->num_runs);
 
     return 0;
 }
@@ -156,7 +155,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
     schedules->schedules = calloc(schedules->count,
                                   sizeof(experiment_schedule_t));
     if (!schedules->schedules) {
-        perror("error allocating experiment schedules");
+        log_error("calloc error: %m");
         lua_pop(L, 1);  /* Pop the experiments table. */
         return -1;
     }
@@ -170,7 +169,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
                                      luaL_checkstring(L, -2),
                                      checkfield_integer(L, -1, "interval_seconds"),
                                      checkfield_integer(L, -1, "num_runs"))) {
-            fprintf(stderr, "Error initializing experiment");
+            log_error("error initializing experiment");
             lua_pop(L, 3);  /* Pop value, key, and experiments table. */
             return -1;
         }

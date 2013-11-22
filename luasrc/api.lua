@@ -13,8 +13,14 @@ utils = require("utils")
 -- Arguments:
 -- - message is the message to log.
 -- Returns: none
-function api.log(...)
-  utils.pprint(unpack(arg))
+function api.log(formatstring, ...)
+  log_info(string.format(formatstring, unpack(arg)))
+end
+function api.log_error(formatstring, ...)
+  log_error(string.format(formatstring, unpack(arg)))
+end
+function api.log_debug(formatstring, ...)
+  log_debug(string.format(formatstring, unpack(arg)))
 end
 
 -- Load a module from the sandboxed module directory.
@@ -86,7 +92,7 @@ function api.write_result(output)
   -- TODO: Check if results/ is present, if not
   --       create it
   local filename = string.format("%s/%s-%s.txt", CENSORSCOPE_OPTIONS.results_dir, SANDBOX_NAME, run_id)
-  utils.pprint("writing results to %s", filename)
+  api.log("writing results to %s", filename)
 
   local handle, err = io.open(filename, "a")
   if err then
