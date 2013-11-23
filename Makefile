@@ -40,7 +40,7 @@ ifdef DEFAULT_UPLOAD_TRANSPORT
 CFLAGS += -DDEFAULT_UPLOAD_TRANSPORT="\"$(DEFAULT_UPLOAD_TRANSPORT)\""
 endif
 LUA_LIBS ?= `pkg-config lua5.1 --libs`
-LDFLAGS += $(LUA_LIBS) -lldns -levent -lcurl -lssl -lcrypto -lz
+LDFLAGS := $(LUA_LIBS) -lldns -levent -lcurl -lssl -lcrypto -lz $(LDFLAGS)
 
 all: $(EXE)
 	echo $(BUILD_DIR)
