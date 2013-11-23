@@ -56,7 +56,7 @@ static void print_usage(const char *program) {
         "  -s --sandbox-dir <path> (default: \"%s\")\n"
         "  -t --experiment-timeout <seconds> (default: %d seconds)\n"
         "  -u --upload-transport <transport> (default: \"%s\")\n"
-        "  -y --synchronous\n";
+        "  -y --synchronous (for debugging only)\n";
     fprintf(stderr,
             usage_string,
             program,
