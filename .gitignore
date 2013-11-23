@@ -4,3 +4,4 @@ results/
 .*.swp
 *.o
 censorscope
+censorscope-tests
