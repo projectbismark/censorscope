@@ -71,7 +71,11 @@ int main(int argc, char **argv) {
     }
 
     /* start the event loop */
-    event_base_dispatch(base);
+    if (event_base_dispatch(base) == -1) {
+        log_error("error calling event_base_dispatch");
+    } else {
+        log_info("no more events to dispatch");
+    }
 
     if (transport_init(&transport, &options, options.upload_transport)) {
         log_error("error initializing transport");
