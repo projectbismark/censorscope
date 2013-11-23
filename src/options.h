@@ -23,6 +23,7 @@ typedef struct {
     char *download_transport;
     char *upload_transport;
     int synchronous;
+    long experiment_timeout_seconds;
 } censorscope_options_t;
 
 int censorscope_options_init(censorscope_options_t *options,

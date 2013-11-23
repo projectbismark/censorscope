@@ -40,6 +40,10 @@
 #define DEFAULT_UPLOAD_TRANSPORT "rsync"
 #endif
 
+#ifndef DEFAULT_EXPERIMENT_TIMEOUT
+#define DEFAULT_EXPERIMENT_TIMEOUT 60
+#endif
+
 static void print_usage(const char *program) {
     const char *usage_string =
         "Usage: %s [options]\n"
@@ -50,6 +54,7 @@ static void print_usage(const char *program) {
         "  -m --max-memory <bytes> (default: %ld)\n"
         "  -r --results-dir <path> (default: \"%s\")\n"
         "  -s --sandbox-dir <path> (default: \"%s\")\n"
+        "  -t --experiment-timeout <seconds> (default: %d seconds)\n"
         "  -u --upload-transport <transport> (default: \"%s\")\n"
         "  -y --synchronous\n";
     fprintf(stderr,
@@ -61,6 +66,7 @@ static void print_usage(const char *program) {
             DEFAULT_MAX_MEMORY,
             DEFAULT_RESULTS_DIR,
             DEFAULT_SANDBOX_DIR,
+            DEFAULT_EXPERIMENT_TIMEOUT,
             DEFAULT_UPLOAD_TRANSPORT);
 }
 
@@ -105,8 +111,9 @@ int censorscope_options_init(censorscope_options_t *options,
         return -1;
     }
     options->synchronous = 0;
+    options->experiment_timeout_seconds = DEFAULT_EXPERIMENT_TIMEOUT;
 
-    const char *short_options = "d:hi:l:m:r:s:u:y";
+    const char *short_options = "d:hi:l:m:r:s:t:u:y";
     const struct option long_options[] = {
         {"download-transport", 1, NULL, 'd'},
         {"help", 0, NULL, 'h'},
@@ -115,6 +122,7 @@ int censorscope_options_init(censorscope_options_t *options,
         {"max-memory", 1, NULL, 'm'},
         {"results-dir", 1, NULL, 'r'},
         {"sandbox-dir", 1, NULL, 's'},
+        {"experiment-timeout", 1, NULL, 't'},
         {"upload-transport", 1, NULL, 'u'},
         {"synchronous", 0, NULL, 'y'},
         {0, 0, 0, 0}
@@ -205,6 +213,23 @@ int censorscope_options_init(censorscope_options_t *options,
             options->sandbox_dir = strdup(optarg);
             if (!options->sandbox_dir) {
                 log_error("strdup error: %m");
+                censorscope_options_destroy(options);
+                return -1;
+            }
+            break;
+
+        case 't':
+            errno = 0;
+            options->experiment_timeout_seconds = strtol(optarg,
+                                                         &first_invalid,
+                                                         10);
+            if (errno) {
+                log_error("strtol error: %m");
+                censorscope_options_destroy(options);
+                return -1;
+            }
+            if (first_invalid[0] != '\0') {
+                log_error("invalid experiment timeout: ");
                 censorscope_options_destroy(options);
                 return -1;
             }
