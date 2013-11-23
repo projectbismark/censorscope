@@ -17,7 +17,7 @@ static void common_log(int level, const char *format, va_list args) {
     va_list args_copy;
     va_copy(args_copy, args);
 
-    vsyslog(LOG_ERR, format, args);
+    vsyslog(level, format, args);
 
     char buf[20];
     time_t now = time(0);
