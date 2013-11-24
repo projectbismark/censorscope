@@ -16,6 +16,11 @@
 #include "sandbox.h"
 #include "util.h"
 
+typedef struct {
+    pid_t pid;
+    struct event *ev;
+} child_info_t;
+
 int experiment_init(experiment_t *experiment,
                     const char *name,
                     censorscope_options_t *options,
@@ -78,11 +83,6 @@ static int run_child(experiment_t *experiment) {
     sandbox_destroy(&sandbox);
     return 0;
 }
-
-typedef struct {
-    pid_t pid;
-    struct event *ev;
-} child_info_t;
 
 static void kill_child(evutil_socket_t fd, short what, void *arg) {
     child_info_t *info = (child_info_t *)arg;
