@@ -99,6 +99,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    logging_exit();
+    logging_destroy();
     return 0;
 }

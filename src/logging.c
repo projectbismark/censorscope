@@ -13,7 +13,7 @@ void logging_init() {
     openlog(LOGGING_IDENT, LOG_CONS, LOG_USER);
 }
 
-void logging_exit() {
+void logging_destroy() {
     closelog();
 }
 
