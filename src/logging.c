@@ -13,6 +13,10 @@ void logging_init() {
     openlog(LOGGING_IDENT, LOG_CONS, LOG_USER);
 }
 
+void logging_destroy() {
+    closelog();
+}
+
 static void common_log(int level, const char *format, va_list args) {
     va_list args_copy;
     va_copy(args_copy, args);
