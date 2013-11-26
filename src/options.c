@@ -77,7 +77,7 @@ static int config_file_handler(void *user, const char *section,
     censorscope_options_t *options = (censorscope_options_t *) user;
 
     char *first_invalid;
-    int errno = 0;
+    errno = 0;
 
     #define MATCH(n) strcmp(name, n) == 0
     if (MATCH("sandbox-dir")) {
@@ -89,7 +89,7 @@ static int config_file_handler(void *user, const char *section,
     else if(MATCH("results-dir")) {
         options->results_dir = strdup(value);
     }
-    else_if(MATCH("max-memory")) {
+    else if(MATCH("max-memory")) {
         options->max_memory = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
@@ -140,10 +140,10 @@ static int config_file_handler(void *user, const char *section,
         }
     }
     else {
-        return -1
+        return -1;
     }
 
-    return 0
+    return 0;
 }
 
 int read_config_file(censorscope_options_t *options) {
@@ -205,7 +205,7 @@ int censorscope_options_init(censorscope_options_t *options,
 
     if (censorscope_options_set_defaults(options)) {
         /* we've already logged the error */
-        return -1
+        return -1;
     }
 
     const char *short_options = "d:hi:l:m:r:s:t:u:y";
