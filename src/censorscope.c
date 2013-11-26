@@ -12,6 +12,7 @@
 #include "options.h"
 #include "sandbox.h"
 #include "scheduling.h"
+#include "termination.h"
 #include "transport.h"
 #include "util.h"
 
@@ -69,6 +70,8 @@ int main(int argc, char **argv) {
         log_error("error destroying sandbox");
         return 1;
     }
+
+    add_termination_handlers(base, &schedules);
 
     /* start the event loop */
     if (event_base_dispatch(base) == -1) {

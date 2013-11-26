@@ -40,6 +40,8 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
                               lua_State *L,
                               int table_index);
 
+int experiment_schedules_stop_pending(experiment_schedules_t *schedules);
+
 int experiment_schedules_destroy(experiment_schedules_t *schedules);
 
 /* Run experiments in an event loop. This function exits when there are no more

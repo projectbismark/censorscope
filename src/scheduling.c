@@ -143,6 +143,20 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
     return 0;
 }
 
+int experiment_schedules_stop_pending(experiment_schedules_t *schedules) {
+    int return_value = 0;
+    for (int i = 0; i < schedules->count; ++i) {
+        if (!schedules->schedules[i].ev) {
+            continue;
+        }
+        if (event_del(schedules->schedules[i].ev)) {
+            log_error("error deleting event");
+            return_value = -1;
+        }
+    }
+    return return_value;
+}
+
 int experiment_schedules_destroy(experiment_schedules_t *schedules) {
     for (int i = 0; i < schedules->count; ++i) {
         experiment_destroy(&schedules->schedules[i].experiment);
