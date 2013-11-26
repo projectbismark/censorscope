@@ -99,5 +99,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    logging_exit();
     return 0;
 }
