@@ -17,10 +17,11 @@ SRCS = \
 	$(SRC_DIR)/util.c
 OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRCS))
 
+TINYTEST_DIR ?= tinytest
 TEST_DIR ?= tests
 TEST_SRCS = \
 	$(SRC_DIR)/util.c \
-	$(TEST_DIR)/tinytest.c \
+	$(TINYTEST_DIR)/tinytest.c \
 	$(TEST_DIR)/tests.c
 TEST_OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(TEST_SRCS))
 
@@ -60,6 +61,10 @@ $(BUILD_DIR)/src/%.o: $(SRC_DIR)/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/tests/%.o: $(TEST_DIR)/%.c
+	mkdir -p $(dir $@)
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/$(TINYTEST_DIR)/%.o: $(TINYTEST_DIR)/%.c
 	mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) $< -o $@
 

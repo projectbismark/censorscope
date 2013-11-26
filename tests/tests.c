@@ -1,5 +1,5 @@
-#include "tinytest.h"
-#include "tinytest_macros.h"
+#include "../tinytest/tinytest.h"
+#include "../tinytest/tinytest_macros.h"
 
 #include <stdio.h>
 #include <stdlib.h>
