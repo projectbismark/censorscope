@@ -78,7 +78,7 @@ static int config_file_handler(void *user, const char *section,
 
     char *first_invalid;
     int errno = 0;
-    
+
     #define MATCH(n) strcmp(name, n) == 0
     if (MATCH("sandbox-dir")) {
         options->sandbox_dir = strdup(value);
@@ -155,9 +155,7 @@ int read_config_file(censorscope_options_t *options) {
     return 0;
 }
 
-int censorscope_options_init(censorscope_options_t *options,
-                             int argc,
-                             char **argv) {
+int censorscope_options_set_defaults(censorscope_options_t *options) {
     options->sandbox_dir = strdup(DEFAULT_SANDBOX_DIR);
     if (!options->sandbox_dir) {
         log_error("strdup error: %m");
@@ -197,6 +195,18 @@ int censorscope_options_init(censorscope_options_t *options,
     }
     options->synchronous = 0;
     options->experiment_timeout_seconds = DEFAULT_EXPERIMENT_TIMEOUT;
+
+    return 0;
+}
+
+int censorscope_options_init(censorscope_options_t *options,
+                             int argc,
+                             char **argv) {
+
+    if (censorscope_options_set_defaults(options)) {
+        /* we've already logged the error */
+        return -1
+    }
 
     const char *short_options = "d:hi:l:m:r:s:t:u:y";
     const struct option long_options[] = {
