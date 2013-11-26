@@ -11,6 +11,7 @@
 #include "lualib.h"
 
 #include "logging.h"
+#include "../ext/ini.h"
 
 #ifndef DEFAULT_SANDBOX_DIR
 #define DEFAULT_SANDBOX_DIR "sandbox"
@@ -68,6 +69,90 @@ static void print_usage(const char *program) {
             DEFAULT_SANDBOX_DIR,
             DEFAULT_EXPERIMENT_TIMEOUT,
             DEFAULT_UPLOAD_TRANSPORT);
+}
+
+static int config_file_handler(void *user, const char *section,
+                               const char* name, const char *value) {
+
+    censorscope_options_t *options = (censorscope_options_t *) user;
+
+    char *first_invalid;
+    int errno = 0;
+    
+    #define MATCH(n) strcmp(name, n) == 0
+    if (MATCH("sandbox-dir")) {
+        options->sandbox_dir = strdup(value);
+    }
+    else if (MATCH("luasrc-dir")) {
+        options->luasrc_dir = strdup(value);
+    }
+    else if(MATCH("results-dir")) {
+        options->results_dir = strdup(value);
+    }
+    else_if(MATCH("max-memory")) {
+        options->max_memory = strtol(value, &first_invalid, 10);
+        if (errno) {
+            log_error("strtol error: %m");
+            censorscope_options_destroy(options);
+            return -1;
+        }
+        if (first_invalid[0] != '\0') {
+            log_error("invalid max memory: not a number");
+            censorscope_options_destroy(options);
+            return -1;
+        }
+    }
+    else if(MATCH("max-instructions")) {
+        options->max_instructions = strtol(value, &first_invalid, 10);
+        if (errno) {
+            log_error("strtol error: %m");
+            censorscope_options_destroy(options);
+            return -1;
+        }
+        if (first_invalid[0] != '\0') {
+            log_error("invalid instruction count: not a number");
+            censorscope_options_destroy(options);
+            return -1;
+        }
+    }
+    else if(MATCH("download-transport")) {
+        options->download_transport = strdup(value);
+    }
+    else if(MATCH("upload-transport")) {
+        options->upload_transport = strdup(value);
+    }
+    else if(MATCH("synchronous")) {
+        options->synchronous = atoi(value);
+    }
+    else if(MATCH("experiment-timeout-seconds")) {
+        options->experiment_timeout_seconds = strtol(value,
+                                                     &first_invalid,
+                                                     10);
+        if (errno) {
+            log_error("strtol error: %m");
+            censorscope_options_destroy(options);
+            return -1;
+        }
+        if (first_invalid[0] != '\0') {
+            log_error("invalid experiment timeout: ");
+            censorscope_options_destroy(options);
+            return -1;
+        }
+    }
+    else {
+        return -1
+    }
+
+    return 0
+}
+
+int read_config_file(censorscope_options_t *options) {
+    if (ini_parse(".censorscope", config_file_handler, options)) {
+        log_error("can not load '.censorscope'");
+        return -1;
+    }
+
+    return 0;
 }
 
 int censorscope_options_init(censorscope_options_t *options,
