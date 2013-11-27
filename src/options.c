@@ -149,8 +149,13 @@ static int config_file_handler(void *user, const char *section,
 }
 
 int parse_config_file(censorscope_options_t *options) {
-    if (ini_parse(".censorscope", config_file_handler, options) < 0) {
+    int error = ini_parse(".censorscope", config_file_handler, options);
+
+    if (error < 0) {
         log_error("can not load '.censorscope'");
+    }
+    else if (error) {
+        log_error("bad config file (first error on line %d)", error);
     }
 
     return 0;
