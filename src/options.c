@@ -146,7 +146,7 @@ static int config_file_handler(void *user, const char *section,
     return 0;
 }
 
-int read_config_file(censorscope_options_t *options) {
+int censorscope_read_config_file(censorscope_options_t *options) {
     if (ini_parse(".censorscope", config_file_handler, options)) {
         log_error("can not load '.censorscope'");
         return -1;
@@ -199,15 +199,8 @@ int censorscope_options_set_defaults(censorscope_options_t *options) {
     return 0;
 }
 
-int censorscope_options_init(censorscope_options_t *options,
-                             int argc,
-                             char **argv) {
-
-    if (censorscope_options_set_defaults(options)) {
-        /* we've already logged the error */
-        return -1;
-    }
-
+int censorscope_parse_cli(censorscope_options_t *options,
+                          int argc, char **argv) {
     const char *short_options = "d:hi:l:m:r:s:t:u:y";
     const struct option long_options[] = {
         {"download-transport", 1, NULL, 'd'},
@@ -350,6 +343,24 @@ int censorscope_options_init(censorscope_options_t *options,
             censorscope_options_destroy(options);
             exit(EXIT_FAILURE);
         }
+    }
+
+    return 0;
+}
+
+int censorscope_options_init(censorscope_options_t *options,
+                             int argc,
+                             char **argv) {
+    /* set default options first */
+    if (censorscope_options_set_defaults(options)) {
+        /* we've already logged the error */
+        return -1;
+    }
+
+    /* parse the command line arguments */
+    if (censorscope_parse_cli(options, argc, argv)) {
+        /* we've already logged the error */
+        return -1;
     }
 
     return 0;
