@@ -79,6 +79,8 @@ static int config_file_handler(void *user, const char *section,
     char *first_invalid;
     errno = 0;
 
+    log_debug("got value '%s' for option '%s' from config file", value, name);
+
     #define MATCH(n) strcmp(name, n) == 0
     if (MATCH("sandbox-dir")) {
         options->sandbox_dir = strdup(value);
@@ -146,16 +148,15 @@ static int config_file_handler(void *user, const char *section,
     return 0;
 }
 
-int censorscope_read_config_file(censorscope_options_t *options) {
-    if (ini_parse(".censorscope", config_file_handler, options)) {
+int parse_config_file(censorscope_options_t *options) {
+    if (ini_parse(".censorscope", config_file_handler, options) < 0) {
         log_error("can not load '.censorscope'");
-        return -1;
     }
 
     return 0;
 }
 
-int censorscope_options_set_defaults(censorscope_options_t *options) {
+int set_default_options(censorscope_options_t *options) {
     options->sandbox_dir = strdup(DEFAULT_SANDBOX_DIR);
     if (!options->sandbox_dir) {
         log_error("strdup error: %m");
@@ -199,7 +200,7 @@ int censorscope_options_set_defaults(censorscope_options_t *options) {
     return 0;
 }
 
-int censorscope_parse_cli(censorscope_options_t *options,
+int parse_cli_options(censorscope_options_t *options,
                           int argc, char **argv) {
     const char *short_options = "d:hi:l:m:r:s:t:u:y";
     const struct option long_options[] = {
@@ -352,13 +353,19 @@ int censorscope_options_init(censorscope_options_t *options,
                              int argc,
                              char **argv) {
     /* set default options first */
-    if (censorscope_options_set_defaults(options)) {
+    if (set_default_options(options)) {
+        /* we've already logged the error */
+        return -1;
+    }
+
+    /* parse the config file */
+    if (parse_config_file(options)) {
         /* we've already logged the error */
         return -1;
     }
 
     /* parse the command line arguments */
-    if (censorscope_parse_cli(options, argc, argv)) {
+    if (parse_cli_options(options, argc, argv)) {
         /* we've already logged the error */
         return -1;
     }
