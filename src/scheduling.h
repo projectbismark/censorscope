@@ -5,19 +5,13 @@
 
 #include "experiment.h"
 #include "options.h"
+#include "subprocesses.h"
 
 struct event_base;
+struct experiment_schedule;
 
 typedef struct {
-    lua_Integer interval_seconds;
-    lua_Integer num_runs;
-    struct event *ev;
-
-    experiment_t experiment;
-} experiment_schedule_t;
-
-typedef struct {
-    experiment_schedule_t *schedules;
+    struct experiment_schedule *schedules;
     int count;
 } experiment_schedules_t;
 
@@ -35,6 +29,7 @@ typedef struct {
  *
  */
 int experiment_schedules_init(experiment_schedules_t *schedules,
+                              subprocesses_t *subprocesses,
                               censorscope_options_t *options,
                               struct event_base *base,
                               lua_State *L,

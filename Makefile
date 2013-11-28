@@ -12,6 +12,7 @@ SRCS = \
 	$(SRC_DIR)/register.c \
 	$(SRC_DIR)/sandbox.c \
 	$(SRC_DIR)/scheduling.c \
+	$(SRC_DIR)/subprocesses.c \
 	$(SRC_DIR)/tcp.c \
 	$(SRC_DIR)/termination.c \
 	$(SRC_DIR)/transport.c \
