@@ -90,9 +90,9 @@ static void kill_subprocess(evutil_socket_t fd, short what, void *arg) {
     /* Reap the pid of the newly killed child. Run in a loop
      * in case a signal interrupts the call to waitpid. */
     do {
-        rc = waitpid(info->pid, NULL, 0);
-    } while(rc == -1 && errno == EINTR);
-    if (rc == -1) {
+        pid = waitpid(info->pid, NULL, 0);
+    } while(pid == -1 && errno == EINTR);
+    if (pid == -1) {
         log_error("waitpid: %m");
         return;
     }
