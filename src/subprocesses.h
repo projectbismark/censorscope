@@ -9,10 +9,16 @@ struct child_info_t;
 struct event;
 struct event_base;
 
+/* This tracks state of subprocesses so we can terminate them after a imeout. */
 typedef struct {
+    /* An array of 'capacity' elements, the first 'count' of which are valid. */
     struct child_info *children;
     int count, capacity;
+
+    /* We need this to add and remove timeout events. */
     struct event_base *base;
+    /* This is the event for the SIGCHLD handler, which we use to remove timeout
+     * events when subprocesses exit early. */
     struct event *sigchld_event;
 } subprocesses_t;
 

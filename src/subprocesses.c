@@ -11,9 +11,14 @@
 
 #include "logging.h"
 
+/* This tracks state for a single subprocess. */
 typedef struct child_info {
+    /* The pid of the subprocess. */
     pid_t pid;
+    /* The subprocess's termination event. */
     struct event *ev;
+    /* A link back to the global subprocesses structure. We need this so a
+     * child_info_t can remove itself for the subprocesses list. */
     subprocesses_t *subprocesses;
 } child_info_t;
 
@@ -97,12 +102,14 @@ static void kill_subprocess(evutil_socket_t fd, short what, void *arg) {
 static void sigchld_handler(evutil_socket_t fd, short what, void *arg) {
     subprocesses_t *subprocesses = (subprocesses_t *)arg;
 
+    /* We might only receive a single SIGCHLD for several exiting children, so
+     * we try to reap as many children as possible. */
     pid_t pid;
     while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
         log_info("reaping pid %d", pid);
         remove_subprocess_killer(subprocesses, pid);
     }
-    if (pid < 0 && errno != ECHILD) {  /* ECHILD isn't an error on this case. */
+    if (pid < 0 && errno != ECHILD) {  /* ECHILD isn't an error in this case. */
         log_error("waitpid: %m");
     }
 }
