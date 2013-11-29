@@ -9,15 +9,13 @@ typedef struct {
     char *name;
     char *path;
     censorscope_options_t *options;
-    struct event_base *base;
 } experiment_t;
 
 int experiment_init(experiment_t *experiment,
                     const char *name,
-                    censorscope_options_t *options,
-                    struct event_base *base);
+                    censorscope_options_t *options);
 
-void experiment_run(experiment_t *experiment);
+int experiment_run(experiment_t *experiment);
 
 int experiment_destroy(experiment_t *experiment);
 

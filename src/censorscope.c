@@ -12,6 +12,7 @@
 #include "options.h"
 #include "sandbox.h"
 #include "scheduling.h"
+#include "subprocesses.h"
 #include "termination.h"
 #include "transport.h"
 #include "util.h"
@@ -22,12 +23,6 @@ int main(int argc, char **argv) {
     censorscope_options_t options;
     if (censorscope_options_init(&options, argc, argv)) {
         log_error("error parsing flags");
-        return 1;
-    }
-
-    struct event_base *base = event_base_new();
-    if (!base) {
-        log_error("could not initialise libevent");
         return 1;
     }
 
@@ -61,8 +56,19 @@ int main(int argc, char **argv) {
         return 1;
     }
     free(main_filename);
+
+    struct event_base *base = event_base_new();
+    if (!base) {
+        log_error("could not initialise libevent");
+        return 1;
+    }
+    subprocesses_t subprocesses;
+    if (subprocesses_init(&subprocesses, base)) {
+        log_error("error initializing subprocess handling");
+        return 1;
+    }
     experiment_schedules_t schedules;
-    if (experiment_schedules_init(&schedules, &options, base, sandbox.L, 1)) {
+    if (experiment_schedules_init(&schedules, &subprocesses, &options, base, sandbox.L, 1)) {
         log_error("error initializing experiments schedule");
         return 1;
     }
@@ -80,6 +86,16 @@ int main(int argc, char **argv) {
         log_info("no more events to dispatch");
     }
 
+    if (experiment_schedules_destroy(&schedules)) {
+        log_error("error destroying schedules");
+        return 1;
+    }
+    if (subprocesses_destroy(&subprocesses)) {
+        log_error("error destroying subprocesses");
+        return 1;
+    }
+    event_base_free(base);
+
     if (transport_init(&transport, &options, options.upload_transport)) {
         log_error("error initializing transport");
         return 1;
@@ -92,11 +108,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if (experiment_schedules_destroy(&schedules)) {
-        log_error("error destroying schedules");
-        return 1;
-    }
-    event_base_free(base);
     if (censorscope_options_destroy(&options)) {
         log_error("error destroying options");
         return 1;

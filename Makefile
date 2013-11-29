@@ -12,6 +12,7 @@ SRCS = \
 	$(SRC_DIR)/register.c \
 	$(SRC_DIR)/sandbox.c \
 	$(SRC_DIR)/scheduling.c \
+	$(SRC_DIR)/subprocesses.c \
 	$(SRC_DIR)/tcp.c \
 	$(SRC_DIR)/termination.c \
 	$(SRC_DIR)/transport.c \
@@ -29,7 +30,7 @@ TEST_OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(TEST_SRCS))
 EXE ?= censorscope
 TEST_EXE ?= censorscope-tests
 LUA_CFLAGS ?= `pkg-config lua5.1 --cflags`
-CFLAGS += $(LUA_CFLAGS) -g -Wall -std=gnu99
+CFLAGS += $(LUA_CFLAGS) -g -Wall -Werror -std=gnu99
 ifdef DEFAULT_SANDBOX_DIR
 CFLAGS += -DDEFAULT_SANDBOX_DIR="\"$(DEFAULT_SANDBOX_DIR)\""
 endif

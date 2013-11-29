@@ -16,17 +16,10 @@
 #include "sandbox.h"
 #include "util.h"
 
-typedef struct {
-    pid_t pid;
-    struct event *ev;
-} child_info_t;
-
 int experiment_init(experiment_t *experiment,
                     const char *name,
-                    censorscope_options_t *options,
-                    struct event_base *base) {
+                    censorscope_options_t *options) {
     experiment->options = options;
-    experiment->base = base;
 
     if (!is_valid_module_name(name)) {
         log_error("invalid experiment name");
@@ -54,7 +47,10 @@ static int set_limits(const censorscope_options_t *options) {
     return 0;
 }
 
-static int run_child(experiment_t *experiment) {
+int experiment_run(experiment_t *experiment) {
+    /* Set OS limits on the child. */
+    set_limits(experiment->options);
+
     censorscope_options_t *options = experiment->options;
 
     sandbox_t sandbox;
@@ -82,97 +78,6 @@ static int run_child(experiment_t *experiment) {
     free(filename);
     sandbox_destroy(&sandbox);
     return 0;
-}
-
-static void kill_child(evutil_socket_t fd, short what, void *arg) {
-    child_info_t *info = (child_info_t *)arg;
-
-    event_free(info->ev);  /* This event does not recur. */
-
-    int rc = waitpid(info->pid, NULL, WNOHANG);
-    if (rc == info->pid) {
-        log_info("pid %d has already exited", info->pid);
-        free(info);
-        return;
-    } else if (rc == -1) {
-        log_error("pid %d is not a child; has it already been reaped?",
-                  info->pid);
-        free(info);
-        return;
-    }
-    log_info("pid %d has not exited yet; killing it now", info->pid);
-    pid_t process_group = -1 * info->pid;
-    if (kill(process_group, SIGKILL)) {
-        log_error("kill: %m");
-        free(info);
-        return;
-    }
-    /* Reap the pid of the newly killed child. */
-    if (waitpid(info->pid, NULL, 0) == -1) {
-        log_error("waitpid: %m");
-    }
-    free(info);
-}
-
-void experiment_run(experiment_t *experiment) {
-    pid_t pid = fork();
-    if (pid < 0) {
-        log_error("fork: %m");
-        return;
-    } else if (pid == 0) {
-        /* We are now the child process. */
-
-        /* Put the child in its own process group so we can kill the process
-         * group as a whole, which will hopefully kill all the child's children
-         * as well. */
-        if (setsid() == -1) {
-            log_error("setsid: %m");
-            exit(EXIT_FAILURE);
-        }
-
-        /* Set OS limits on the child. */
-        set_limits(experiment->options);
-
-        if (run_child(experiment)) {
-            exit(EXIT_FAILURE);
-        }
-        exit(EXIT_SUCCESS);
-    }
-
-    /* We are still in the parent. */
-
-    log_info("spawned child pid %d", pid);
-
-    child_info_t *info = malloc(sizeof(child_info_t));
-    if (!info) {
-        log_error("malloc: %m");
-        return;
-    }
-    struct event *ev = event_new(experiment->base,
-                                 -1,
-                                 EV_TIMEOUT,
-                                 kill_child,
-                                 info);
-    if (!ev) {
-        log_error("error creating timeout event");
-        free(info);
-        return;
-    }
-    info->pid = pid;
-    info->ev = ev;
-    struct timeval kill_timeout = {
-        experiment->options->experiment_timeout_seconds, 0 };
-    if (event_add(ev, &kill_timeout)) {
-        log_info("error calling event_add");
-        event_free(ev);
-        free(info);
-        return;
-    }
-    if (experiment->options->synchronous) {
-        log_info("running experiment synchronously");
-        waitpid(pid, NULL, 0);
-    }
-    return;
 }
 
 int experiment_destroy(experiment_t *experiment) {

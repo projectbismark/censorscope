@@ -17,7 +17,17 @@
 #include "options.h"
 #include "register.h"
 #include "sandbox.h"
+#include "subprocesses.h"
 #include "util.h"
+
+typedef struct experiment_schedule {
+    lua_Integer interval_seconds;
+    lua_Integer num_runs;
+    struct event *ev;
+
+    experiment_t experiment;
+    subprocesses_t *subprocesses;
+} experiment_schedule_t;
 
 /* Return the total number of keys in a table. Adapted from
  * http://www.lua.org/manual/5.1/manual.html#lua_next
@@ -47,15 +57,25 @@ static void experiment_callback(evutil_socket_t fd, short what, void *arg) {
     } else {
         schedule->num_runs--;
     }
-    experiment_run(&schedule->experiment);
+    time_t timeout = schedule->experiment.options->experiment_timeout_seconds;
+    int rc = subprocesses_fork(schedule->subprocesses, timeout);
+    if (rc != 0) {
+        return;
+    }
+    if (experiment_run(&schedule->experiment)) {
+        exit(EXIT_FAILURE);
+    }
+    exit(EXIT_SUCCESS);
 }
 
 static int experiment_schedule_init(experiment_schedule_t *schedule,
+                                    subprocesses_t *subprocesses,
                                     censorscope_options_t *options,
                                     struct event_base *base,
                                     const char *name,
                                     int interval_seconds,
                                     int num_runs) {
+    schedule->subprocesses = subprocesses;
     schedule->interval_seconds = interval_seconds;
     schedule->num_runs = num_runs;
 
@@ -74,7 +94,7 @@ static int experiment_schedule_init(experiment_schedule_t *schedule,
         return -1;
     }
 
-    if (experiment_init(&schedule->experiment, name, options, base)) {
+    if (experiment_init(&schedule->experiment, name, options)) {
         log_error("error initializing experiment");
         return -1;
     }
@@ -105,6 +125,7 @@ static lua_Integer checkfield_integer(lua_State *L,
 }
 
 int experiment_schedules_init(experiment_schedules_t *schedules,
+                              subprocesses_t *subprocesses,
                               censorscope_options_t *options,
                               struct event_base *base,
                               lua_State *L,
@@ -124,6 +145,7 @@ int experiment_schedules_init(experiment_schedules_t *schedules,
     lua_pushnil(L);  /* first key */
     while (lua_next(L, -2) != 0) {
         if (experiment_schedule_init(&schedules->schedules[i],
+                                     subprocesses,
                                      options,
                                      base,
                                      luaL_checkstring(L, -2),
