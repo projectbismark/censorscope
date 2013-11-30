@@ -1,6 +1,7 @@
 CC ?= gcc
 
 SRC_DIR ?= src
+EXT_DIR ?= ext
 BUILD_DIR ?= build
 SRCS = \
 	$(SRC_DIR)/censorscope.c \
@@ -16,10 +17,10 @@ SRCS = \
 	$(SRC_DIR)/tcp.c \
 	$(SRC_DIR)/termination.c \
 	$(SRC_DIR)/transport.c \
-	$(SRC_DIR)/util.c
+	$(SRC_DIR)/util.c \
+	$(EXT_DIR)/ini.c
 OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRCS))
 
-EXT_DIR ?= ext
 TEST_DIR ?= tests
 TEST_SRCS = \
 	$(SRC_DIR)/util.c \
