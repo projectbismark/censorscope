@@ -45,6 +45,10 @@
 #define DEFAULT_EXPERIMENT_TIMEOUT 60
 #endif
 
+#ifndef DEFAULT_CONFIG_PATH
+#define DEFAULT_CONFIG_PATH "/etc/censorscope/censorscope.conf"
+#endif
+
 static void print_usage(const char *program) {
     const char *usage_string =
         "Usage: %s [options]\n"
@@ -84,14 +88,11 @@ static int config_file_handler(void *user, const char *section,
     #define MATCH(n) strcmp(name, n) == 0
     if (MATCH("sandbox-dir")) {
         options->sandbox_dir = strdup(value);
-    }
-    else if (MATCH("luasrc-dir")) {
+    } else if (MATCH("luasrc-dir")) {
         options->luasrc_dir = strdup(value);
-    }
-    else if(MATCH("results-dir")) {
+    } else if(MATCH("results-dir")) {
         options->results_dir = strdup(value);
-    }
-    else if(MATCH("max-memory")) {
+    } else if(MATCH("max-memory")) {
         options->max_memory = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
@@ -103,8 +104,7 @@ static int config_file_handler(void *user, const char *section,
             censorscope_options_destroy(options);
             return -1;
         }
-    }
-    else if(MATCH("max-instructions")) {
+    } else if(MATCH("max-instructions")) {
         options->max_instructions = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
@@ -116,17 +116,13 @@ static int config_file_handler(void *user, const char *section,
             censorscope_options_destroy(options);
             return -1;
         }
-    }
-    else if(MATCH("download-transport")) {
+    } else if(MATCH("download-transport")) {
         options->download_transport = strdup(value);
-    }
-    else if(MATCH("upload-transport")) {
+    } else if(MATCH("upload-transport")) {
         options->upload_transport = strdup(value);
-    }
-    else if(MATCH("synchronous")) {
+    } else if(MATCH("synchronous")) {
         options->synchronous = atoi(value);
-    }
-    else if(MATCH("experiment-timeout-seconds")) {
+    } else if(MATCH("experiment-timeout-seconds")) {
         options->experiment_timeout_seconds = strtol(value,
                                                      &first_invalid,
                                                      10);
@@ -140,8 +136,7 @@ static int config_file_handler(void *user, const char *section,
             censorscope_options_destroy(options);
             return -1;
         }
-    }
-    else {
+    } else {
         return -1;
     }
 
@@ -149,10 +144,10 @@ static int config_file_handler(void *user, const char *section,
 }
 
 int parse_config_file(censorscope_options_t *options) {
-    int error = ini_parse(".censorscope", config_file_handler, options);
+    int error = ini_parse(DEFAULT_CONFIG_PATH, config_file_handler, options);
 
     if (error < 0) {
-        log_error("can not load '.censorscope'");
+        log_error("can not load '%s'", DEFAULT_CONFIG_PATH);
     }
     else if (error) {
         log_error("bad config file (first error on line %d)", error);
