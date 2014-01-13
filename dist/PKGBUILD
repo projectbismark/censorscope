@@ -1,0 +1,41 @@
+# Maintainer: Sam Burnett <srburnet@gmail.com>
+pkgname=censorscope-git
+_pkgname=censorscope
+pkgver=HEAD
+pkgrel=1
+pkgdesc=""
+arch=('i686' 'x86_64')
+url="https://github.com/projectbismark/censorscope"
+license=('MIT' 'BSD')
+depends=('libevent' 'lua51' 'curl' 'ldns')
+makedepends=('git')
+source=("$_pkgname::git+https://github.com/projectbismark/censorscope.git")
+md5sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/${_pkgname}"
+}
+
+build() {
+  cd "${srcdir}/${_pkgname}"
+
+  make DEFAULT_SANDBOX_DIR=/var/censorscope/sandbox \
+       DEFAULT_LUASRC_DIR=/usr/share/lua/5.1/censorscope \
+       DEFAULT_RESULTS_DIR=/var/censorscope/results \
+       DEFAULT_DOWNLOAD_TRANSPORT=rsync \
+       DEFAULT_UPLOAD_TRANSPORT=rsync \
+       CONFIGURATION_PATH=/etc/censorscope.conf
+}
+
+package() {
+  cd "$srcdir/${_pkgname}"
+
+  install -D censorscope ${pkgdir}/usr/bin/censorscope
+  install -d ${pkgdir}/usr/share/lua/5.1/censorscope
+  install -m0644 -t ${pkgdir}/usr/share/lua/5.1/censorscope luasrc/*.lua
+  install -d ${pkgdir}/usr/share/lua/5.1/censorscope/transports
+  install -m0644 -t ${pkgdir}/usr/share/lua/5.1/censorscope/transports luasrc/transports/*.lua
+  install -d ${pkgdir}/etc
+  install -m0644 dist/censorscope.conf.archlinux ${pkgdir}/etc/censorscope.conf
+  install -d ${pkgdir}/var/censorscope/sandbox ${pkgdir}/var/censorscope/results
+}

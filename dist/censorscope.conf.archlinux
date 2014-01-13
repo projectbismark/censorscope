@@ -1,0 +1,8 @@
+sandbox-dir = /var/censorscope/sandbox
+luasrc-dir = /usr/share/lua/5.1/censorscope
+results-dir = /var/censorscope/results
+max-memory = 0
+max-instructions = 0
+download-transport = rsync
+upload-transport = rsync
+experiment-timeout-seconds = 60
