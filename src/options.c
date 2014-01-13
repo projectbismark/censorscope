@@ -85,14 +85,13 @@ static int config_file_handler(void *user, const char *section,
 
     log_debug("got value '%s' for option '%s' from config file", value, name);
 
-    #define MATCH(n) strcmp(name, n) == 0
-    if (MATCH("sandbox-dir")) {
+    if (strcmp(name, "sandbox-dir") == 0) {
         options->sandbox_dir = strdup(value);
-    } else if (MATCH("luasrc-dir")) {
+    } else if (strcmp(name, "luasrc-dir") == 0) {
         options->luasrc_dir = strdup(value);
-    } else if(MATCH("results-dir")) {
+    } else if (strcmp(name, "results-dir") == 0) {
         options->results_dir = strdup(value);
-    } else if(MATCH("max-memory")) {
+    } else if (strcmp(name, "max-memory") == 0) {
         options->max_memory = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
@@ -104,7 +103,7 @@ static int config_file_handler(void *user, const char *section,
             censorscope_options_destroy(options);
             return -1;
         }
-    } else if(MATCH("max-instructions")) {
+    } else if (strcmp(name, "max-instructions") == 0) {
         options->max_instructions = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
@@ -116,16 +115,14 @@ static int config_file_handler(void *user, const char *section,
             censorscope_options_destroy(options);
             return -1;
         }
-    } else if(MATCH("download-transport")) {
+    } else if (strcmp(name, "download-transport") == 0) {
         options->download_transport = strdup(value);
-    } else if(MATCH("upload-transport")) {
+    } else if (strcmp(name, "upload-transport") == 0) {
         options->upload_transport = strdup(value);
-    } else if(MATCH("synchronous")) {
+    } else if (strcmp(name, "synchronous") == 0) {
         options->synchronous = atoi(value);
-    } else if(MATCH("experiment-timeout-seconds")) {
-        options->experiment_timeout_seconds = strtol(value,
-                                                     &first_invalid,
-                                                     10);
+    } else if (strcmp(name, "experiment-timeout-seconds") == 0) {
+        options->experiment_timeout_seconds = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
             censorscope_options_destroy(options);
@@ -148,8 +145,7 @@ static int parse_config_file(censorscope_options_t *options) {
 
     if (error < 0) {
         log_error("can not load '%s'", DEFAULT_CONFIG_PATH);
-    }
-    else if (error) {
+    } else if (error) {
         log_error("bad config file (first error on line %d)", error);
     }
 
