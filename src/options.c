@@ -96,24 +96,24 @@ static int config_file_handler(void *user, const char *section,
         if (errno) {
             log_error("strtol error: %m");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
         if (first_invalid[0] != '\0') {
             log_error("invalid max memory: not a number");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
     } else if (strcmp(name, "max-instructions") == 0) {
         options->max_instructions = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
         if (first_invalid[0] != '\0') {
             log_error("invalid instruction count: not a number");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
     } else if (strcmp(name, "download-transport") == 0) {
         options->download_transport = strdup(value);
@@ -126,30 +126,46 @@ static int config_file_handler(void *user, const char *section,
         if (errno) {
             log_error("strtol error: %m");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
         if (first_invalid[0] != '\0') {
             log_error("invalid experiment timeout: ");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
     } else {
-        return -1;
+        log_error("invalid configuration option: '%s'", name);
+        return 0;
     }
 
-    return 0;
+    return 1;
 }
 
 static int parse_config_file(censorscope_options_t *options) {
     int error = ini_parse(DEFAULT_CONFIG_PATH, config_file_handler, options);
 
-    if (error < 0) {
-        log_error("can not load '%s'", DEFAULT_CONFIG_PATH);
-    } else if (error) {
-        log_error("bad config file (first error on line %d)", error);
+    if (error == 0) {
+        log_info("successfully loaded configuration from '%s'",
+                 DEFAULT_CONFIG_PATH);
+        return 0;
+    } else if (error == -1) {
+        log_error("error opening configuration file '%s'", DEFAULT_CONFIG_PATH);
+        return -1;
+    } else if (error == -2) {
+        log_error("error allocating memory for configuration file '%s'",
+                  DEFAULT_CONFIG_PATH);
+        return -1;
+    } else if (error > 0) {
+        log_error("error in configution file '%s'; first error on line %d",
+                  DEFAULT_CONFIG_PATH,
+                  error);
+        return -1;
+    } else {
+        log_error("unknown error loading configution file '%s': %d",
+                  DEFAULT_CONFIG_PATH,
+                  error);
+        return -1;
     }
-
-    return 0;
 }
 
 static int set_default_options(censorscope_options_t *options) {
