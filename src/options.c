@@ -143,7 +143,7 @@ static int config_file_handler(void *user, const char *section,
     return 0;
 }
 
-int parse_config_file(censorscope_options_t *options) {
+static int parse_config_file(censorscope_options_t *options) {
     int error = ini_parse(DEFAULT_CONFIG_PATH, config_file_handler, options);
 
     if (error < 0) {
@@ -156,7 +156,7 @@ int parse_config_file(censorscope_options_t *options) {
     return 0;
 }
 
-int set_default_options(censorscope_options_t *options) {
+static int set_default_options(censorscope_options_t *options) {
     options->sandbox_dir = strdup(DEFAULT_SANDBOX_DIR);
     if (!options->sandbox_dir) {
         log_error("strdup error: %m");
@@ -200,8 +200,9 @@ int set_default_options(censorscope_options_t *options) {
     return 0;
 }
 
-int parse_cli_options(censorscope_options_t *options,
-                          int argc, char **argv) {
+static int parse_cli_options(censorscope_options_t *options,
+                             int argc,
+                             char **argv) {
     const char *short_options = "d:hi:l:m:r:s:t:u:y";
     const struct option long_options[] = {
         {"download-transport", 1, NULL, 'd'},
