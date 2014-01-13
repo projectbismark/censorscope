@@ -46,7 +46,7 @@
 #endif
 
 #ifndef DEFAULT_CONFIG_PATH
-#define DEFAULT_CONFIG_PATH "/etc/censorscope/censorscope.conf"
+#define DEFAULT_CONFIG_PATH "censorscope.conf"
 #endif
 
 static void print_usage(const char *program) {
