@@ -53,6 +53,9 @@ endif
 ifdef DEFAULT_UPLOAD_TRANSPORT
 CFLAGS += -DDEFAULT_UPLOAD_TRANSPORT="\"$(DEFAULT_UPLOAD_TRANSPORT)\""
 endif
+ifdef CONFIGURATION_PATH
+CFLAGS += -DCONFIGURATION_PATH="\"$(CONFIGURATION_PATH)\""
+endif
 LUA_LIBS ?= `pkg-config lua5.1 --libs`
 LDFLAGS := $(LUA_LIBS) -lldns -levent -lcurl -lssl -lcrypto -lz $(LDFLAGS)
 

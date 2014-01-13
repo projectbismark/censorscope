@@ -45,8 +45,8 @@
 #define DEFAULT_EXPERIMENT_TIMEOUT 60
 #endif
 
-#ifndef DEFAULT_CONFIG_PATH
-#define DEFAULT_CONFIG_PATH "censorscope.conf"
+#ifndef CONFIGURATION_PATH
+#define CONFIGURATION_PATH "censorscope.conf"
 #endif
 
 static void print_usage(const char *program) {
@@ -142,27 +142,27 @@ static int config_file_handler(void *user, const char *section,
 }
 
 static int parse_config_file(censorscope_options_t *options) {
-    int error = ini_parse(DEFAULT_CONFIG_PATH, config_file_handler, options);
+    int error = ini_parse(CONFIGURATION_PATH, config_file_handler, options);
 
     if (error == 0) {
         log_info("successfully loaded configuration from '%s'",
-                 DEFAULT_CONFIG_PATH);
+                 CONFIGURATION_PATH);
         return 0;
     } else if (error == -1) {
-        log_error("error opening configuration file '%s'", DEFAULT_CONFIG_PATH);
+        log_error("error opening configuration file '%s'", CONFIGURATION_PATH);
         return -1;
     } else if (error == -2) {
         log_error("error allocating memory for configuration file '%s'",
-                  DEFAULT_CONFIG_PATH);
+                  CONFIGURATION_PATH);
         return -1;
     } else if (error > 0) {
         log_error("error in configution file '%s'; first error on line %d",
-                  DEFAULT_CONFIG_PATH,
+                  CONFIGURATION_PATH,
                   error);
         return -1;
     } else {
         log_error("unknown error loading configution file '%s': %d",
-                  DEFAULT_CONFIG_PATH,
+                  CONFIGURATION_PATH,
                   error);
         return -1;
     }
