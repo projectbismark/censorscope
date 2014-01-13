@@ -45,8 +45,8 @@
 #define DEFAULT_EXPERIMENT_TIMEOUT 60
 #endif
 
-#ifndef DEFAULT_CONFIG_PATH
-#define DEFAULT_CONFIG_PATH "/etc/censorscope/censorscope.conf"
+#ifndef CONFIGURATION_PATH
+#define CONFIGURATION_PATH "censorscope.conf"
 #endif
 
 static void print_usage(const char *program) {
@@ -85,78 +85,90 @@ static int config_file_handler(void *user, const char *section,
 
     log_debug("got value '%s' for option '%s' from config file", value, name);
 
-    #define MATCH(n) strcmp(name, n) == 0
-    if (MATCH("sandbox-dir")) {
+    if (strcmp(name, "sandbox-dir") == 0) {
         options->sandbox_dir = strdup(value);
-    } else if (MATCH("luasrc-dir")) {
+    } else if (strcmp(name, "luasrc-dir") == 0) {
         options->luasrc_dir = strdup(value);
-    } else if(MATCH("results-dir")) {
+    } else if (strcmp(name, "results-dir") == 0) {
         options->results_dir = strdup(value);
-    } else if(MATCH("max-memory")) {
+    } else if (strcmp(name, "max-memory") == 0) {
         options->max_memory = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
         if (first_invalid[0] != '\0') {
             log_error("invalid max memory: not a number");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
-    } else if(MATCH("max-instructions")) {
+    } else if (strcmp(name, "max-instructions") == 0) {
         options->max_instructions = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
         if (first_invalid[0] != '\0') {
             log_error("invalid instruction count: not a number");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
-    } else if(MATCH("download-transport")) {
+    } else if (strcmp(name, "download-transport") == 0) {
         options->download_transport = strdup(value);
-    } else if(MATCH("upload-transport")) {
+    } else if (strcmp(name, "upload-transport") == 0) {
         options->upload_transport = strdup(value);
-    } else if(MATCH("synchronous")) {
+    } else if (strcmp(name, "synchronous") == 0) {
         options->synchronous = atoi(value);
-    } else if(MATCH("experiment-timeout-seconds")) {
-        options->experiment_timeout_seconds = strtol(value,
-                                                     &first_invalid,
-                                                     10);
+    } else if (strcmp(name, "experiment-timeout-seconds") == 0) {
+        options->experiment_timeout_seconds = strtol(value, &first_invalid, 10);
         if (errno) {
             log_error("strtol error: %m");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
         if (first_invalid[0] != '\0') {
             log_error("invalid experiment timeout: ");
             censorscope_options_destroy(options);
-            return -1;
+            return 0;
         }
     } else {
+        log_error("invalid configuration option: '%s'", name);
+        return 0;
+    }
+
+    return 1;
+}
+
+static int parse_config_file(censorscope_options_t *options) {
+    int error = ini_parse(CONFIGURATION_PATH, config_file_handler, options);
+
+    if (error == 0) {
+        log_info("successfully loaded configuration from '%s'",
+                 CONFIGURATION_PATH);
+        return 0;
+    } else if (error == -1) {
+        log_error("error opening configuration file '%s'", CONFIGURATION_PATH);
+        return -1;
+    } else if (error == -2) {
+        log_error("error allocating memory for configuration file '%s'",
+                  CONFIGURATION_PATH);
+        return -1;
+    } else if (error > 0) {
+        log_error("error in configution file '%s'; first error on line %d",
+                  CONFIGURATION_PATH,
+                  error);
+        return -1;
+    } else {
+        log_error("unknown error loading configution file '%s': %d",
+                  CONFIGURATION_PATH,
+                  error);
         return -1;
     }
-
-    return 0;
 }
 
-int parse_config_file(censorscope_options_t *options) {
-    int error = ini_parse(DEFAULT_CONFIG_PATH, config_file_handler, options);
-
-    if (error < 0) {
-        log_error("can not load '%s'", DEFAULT_CONFIG_PATH);
-    }
-    else if (error) {
-        log_error("bad config file (first error on line %d)", error);
-    }
-
-    return 0;
-}
-
-int set_default_options(censorscope_options_t *options) {
+static int set_default_options(censorscope_options_t *options) {
     options->sandbox_dir = strdup(DEFAULT_SANDBOX_DIR);
     if (!options->sandbox_dir) {
         log_error("strdup error: %m");
@@ -200,8 +212,9 @@ int set_default_options(censorscope_options_t *options) {
     return 0;
 }
 
-int parse_cli_options(censorscope_options_t *options,
-                          int argc, char **argv) {
+static int parse_cli_options(censorscope_options_t *options,
+                             int argc,
+                             char **argv) {
     const char *short_options = "d:hi:l:m:r:s:t:u:y";
     const struct option long_options[] = {
         {"download-transport", 1, NULL, 'd'},
