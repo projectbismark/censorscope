@@ -10,6 +10,7 @@ SRCS = \
 	$(SRC_DIR)/http.c \
 	$(SRC_DIR)/logging.c \
 	$(SRC_DIR)/options.c \
+	$(SRC_DIR)/ponyfunctions.c \
 	$(SRC_DIR)/register.c \
 	$(SRC_DIR)/sandbox.c \
 	$(SRC_DIR)/scheduling.c \
@@ -30,7 +31,7 @@ TEST_OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(TEST_SRCS))
 
 EXE ?= censorscope
 TEST_EXE ?= censorscope-tests
-LUA_CFLAGS ?= `pkg-config lua5.1 --cflags`
+LUA_CFLAGS ?= `pkg-config lua5.1 python2.7 --cflags`
 CFLAGS += $(LUA_CFLAGS) -g -Wall -Werror -std=gnu99
 ifdef DEFAULT_SANDBOX_DIR
 CFLAGS += -DDEFAULT_SANDBOX_DIR="\"$(DEFAULT_SANDBOX_DIR)\""
@@ -56,7 +57,7 @@ endif
 ifdef CONFIGURATION_PATH
 CFLAGS += -DCONFIGURATION_PATH="\"$(CONFIGURATION_PATH)\""
 endif
-LUA_LIBS ?= `pkg-config lua5.1 --libs`
+LUA_LIBS ?= `pkg-config lua5.1 python2.7 --libs`
 LDFLAGS := $(LUA_LIBS) -lldns -levent -lcurl -lssl -lcrypto -lz $(LDFLAGS)
 
 all: $(EXE)

@@ -65,6 +65,12 @@ int register_functions(censorscope_options_t *options, sandbox_t *sandbox) {
     lua_register(sandbox->L, "log_info", l_log_info);
     lua_register(sandbox->L, "log_debug", l_log_debug);
 
+    lua_register(sandbox->L, "pony_ping", pony_ping);
+    lua_register(sandbox->L, "pony_traceroute", pony_traceroute);
+    lua_register(sandbox->L, "pony_fasttraceroute", pony_fasttraceroute);
+    lua_register(sandbox->L, "pony_dns", pony_dns);
+    lua_register(sandbox->L, "pony_gethttp", pony_gethttp);
+
     lua_pushlightuserdata(sandbox->L, options);
     lua_pushlightuserdata(sandbox->L, sandbox);
     lua_pushcclosure(sandbox->L, run_in_sandbox, 2);
